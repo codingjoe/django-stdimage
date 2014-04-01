@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
 import os
-from cStringIO import StringIO
+from six.moves import StringIO
 from django.db.models import signals
 from django.db.models.fields.files import ImageField, ImageFileDescriptor, ImageFieldFile
 from django.core.files.base import ContentFile
@@ -13,9 +15,9 @@ try:
 except ImportError:
     from PIL import Image, ImageOps
 
-from forms import StdImageFormField
-from widgets import DelAdminFileWidget
-from utils import upload_to_class_name_dir, upload_to_class_name_dir_uuid, upload_to_uuid
+from .forms import StdImageFormField
+from .widgets import DelAdminFileWidget
+from .utils import upload_to_class_name_dir, upload_to_class_name_dir_uuid, upload_to_uuid
 
 UPLOAD_TO_CLASS_NAME = upload_to_class_name_dir
 UPLOAD_TO_CLASS_NAME_UUID = upload_to_class_name_dir_uuid
@@ -52,9 +54,6 @@ class StdImageFieldFile(ImageFieldFile):
         """
         Renders the image variations and saves them to the storage
         """
-        if not variation['resample']:
-            resample = Image.ANTIALIAS
-
         content.seek(0)
 
         img = Image.open(content)
@@ -120,48 +119,51 @@ class StdImageField(ImageField):
 
     attr_class = StdImageFieldFile
 
-    def __init__(self, verbose_name=None, name=None, variations={}, min_size=None, max_size=None, *args, **kwargs):
+    def __init__(self, verbose_name=None, name=None, size=None, variations={},
+        min_size=None, max_size=None, thumbnail_size=None, *args, **kwargs):
         """
         Standardized ImageField for Django
-        Usage: StdImageField(upload_to='PATH', variations={'thumbnail': (width, height, boolean, algorithm)})
+        Usage: StdImageField(upload_to='PATH', variations={'thumbnail': {"width", "height", "crop", "resample"}})
         :param variations: size variations of the image
         :rtype variations: StdImageField
         """
+        def_variation = {
+            'width': float('inf'),
+            'height': float('inf'),
+            'crop': False,
+            'resample': Image.ANTIALIAS
+        }
+        self.variations = {}
+        self.min_size = [0, 0]
+        self.max_size = max_size or [float('inf'), float('inf')]
 
-        param_size = ('width', 'height', 'crop', 'resample')
-        self.variations = []
-        self.min_size = {'width': 0, 'height': 0}
-        self.max_size = {'width': float('inf'), 'height': float('inf')}
+        if thumbnail_size:
+            self.variations["thumbnail"] = {
+                "name": "thumbnail",
+                "width": thumbnail_size[0],
+                "height": thumbnail_size[1],
+                "crop": thumbnail_size[2] if len(thumbnail_size) > 2 else False,
+                'resample': Image.ANTIALIAS
+            }
+        if size:
+            self.variations["resized"] = {
+                "name": "resized",
+                "width": size[0],
+                "height": size[1],
+                "crop": size[2] if len(size) > 2 else False,
+                'resample': Image.ANTIALIAS
+            }
+        for nm, params in list(variations.items()):
+            variation = def_variation.copy()
+            variation.update(params)
+            variation["name"] = nm
+            self.variations[nm] = variation
 
-        for key, attr in variations.iteritems():
-            if attr and isinstance(attr, (tuple, list)):
-                variation = dict(map(None, param_size, attr))
-                variation['name'] = key
-                setattr(self, key, variation)
-                self.variations.append(variation)
-            else:
-                setattr(self, key, None)
-
-        if 'django.contrib.admin' in settings.INSTALLED_APPS and not hasattr(self.variations, 'admin'):
-            self.variations.append({'name': 'admin',
-                                    'width': 100,
-                                    'height': 100,
-                                    'crop': False,
-                                    'resample': Image.NEAREST})
-
-        if not min_size:  # min_size gets set to biggest variation
-            for variation in self.variations:
-                if variation['width'] > self.min_size['width']:
-                    self.min_size['width'] = variation['width']
-                if variation['height'] > self.min_size['height']:
-                    self.min_size['height'] = variation['height']
-        else:
-            self.min_size['width'] = min_size[0]
-            self.min_size['height'] = min_size[1]
-
-        if max_size:
-            self.max_size['width'] = max_size[0]
-            self.max_size['height'] = max_size[1]
+        if 'django.contrib.admin' in settings.INSTALLED_APPS and 'admin' not in self.variations:
+            self.variations['admin'] = {'name': 'admin', 'width': 100, 'height': 100,
+                                        'crop': False, 'resample': Image.NEAREST}
+        self.min_size[0] = max(self.variations.values(), default=0, key=lambda x: x["width"])
+        self.min_size[1] = max(self.variations.values(), default=0, key=lambda x: x["height"])
 
         super(StdImageField, self).__init__(verbose_name, name, *args, **kwargs)
 
@@ -175,10 +177,10 @@ class StdImageField(ImageField):
         """
         if getattr(instance, self.name):
             field = getattr(instance, self.name)
-            for variation in self.variations:
+            for name, variation in list(self.variations.items()):
                 variation_name = self.attr_class.get_variation_name(instance, self, variation)
                 variation_field = ImageFieldFile(instance, self, variation_name)
-                setattr(field, variation['name'], variation_field)
+                setattr(field, name, variation_field)
 
     def save_form_data(self, instance, data):
         """
@@ -220,11 +222,11 @@ class StdImageField(ImageField):
             value.seek(0)
             stream = StringIO(value.read())
             img = Image.open(stream)
-            if img.size[0] < self.min_size['width'] or img.size[1] < self.min_size['height']:
+            if img.size[0] < self.min_size[0] or img.size[1] < self.min_size[1]:
                 raise ValidationError(
                     _('The image you uploaded is too small. The required minimal resolution is: %sx%s px.') %
-                    (self.min_size['width'], self.min_size['height']))
-            elif img.size[0] > self.max_size['width'] or img.size[1] > self.max_size['height']:
+                    (self.min_size[0], self.min_size[1]))
+            elif img.size[0] > self.max_size[0] or img.size[1] > self.max_size[1]:
                 raise ValidationError(
                     _('The image you uploaded is too large. The required maximal resolution is: %sx%s px.') %
-                    (self.max_size['width'], self.max_size['height']))
+                    (self.max_size[0], self.max_size[1]))

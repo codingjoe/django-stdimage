@@ -27,7 +27,7 @@ class TestStdImage(TestCase):
 
     def tearDown(self):
         """Close all open fixtures and delete everything from media"""
-        for fixture in self.fixtures.values():
+        for fixture in list(self.fixtures.values()):
             fixture.close()
 
         for root, dirs, files in os.walk(IMG_DIR, topdown=False):
