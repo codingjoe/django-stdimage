@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import absolute_import
+
 import os
 from django.conf import settings
 from django.core.files import File
@@ -5,6 +8,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from .forms import *
+from .models import NewParamsModel
 
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
@@ -171,3 +175,50 @@ class TestAdmin(TestStdImage):
 
         response = self.client.get('/admin/testproject/thumbnailmodel/1/')
         self.assertContains(response, '<img src="/media/img/image.admin.jpg" alt="image thumbnail"/>')
+
+
+class TestNewParams(TestStdImage):
+    def test_new_params(self):
+        """ Tests if uploaded picture has minimal size """
+        self.client.post('/admin/testproject/newparamsmodel/add/', {
+            'image': self.fixtures['600x400.jpg'],
+            'image1': self.fixtures['600x400.jpg'],
+            'image2': self.fixtures['600x400.jpg'],
+        })
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image.thumbnail.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image.resized.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image.large.jpg')))
+
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image1.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image1.thumbnail.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image1.resized.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image1.large.jpg')))
+
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image2.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image2.thumbnail.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image2.resized.jpg')))
+        self.assertFalse(os.path.exists(os.path.join(IMG_DIR, 'image2.large.jpg')))
+
+        instance = NewParamsModel.objects.get(id=1)
+
+        self.assertEquals(instance.image.thumbnail.width,  100)
+        self.assertEquals(instance.image.thumbnail.height, 100)
+        self.assertEquals(instance.image.resized.width,  300)
+        self.assertEquals(instance.image.resized.height, 200)
+        self.assertEquals(instance.image.large.width,  600)
+        self.assertEquals(instance.image.large.height, 400)
+
+        self.assertEquals(instance.image1.thumbnail.width,  100)
+        self.assertEquals(instance.image1.thumbnail.height, 100)
+        self.assertEquals(instance.image1.resized.width,  300)
+        self.assertEquals(instance.image1.resized.height, 200)
+        self.assertEquals(instance.image1.large.width,  600)
+        self.assertEquals(instance.image1.large.height, 400)
+
+        self.assertEquals(instance.image2.thumbnail.width,  100)
+        self.assertEquals(instance.image2.thumbnail.height, 100)
+        self.assertEquals(instance.image2.resized.width,  300)
+        self.assertEquals(instance.image2.resized.height, 200)
+        self.assertEquals(instance.image2.large.width,  600)
+        self.assertEquals(instance.image2.large.height, 400)

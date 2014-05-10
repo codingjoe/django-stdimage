@@ -53,3 +53,17 @@ class AllModel(models.Model):
     """all previous features in one declaration"""
     image = StdImageField(upload_to=upload_to, blank=True,
                           variations={'large': (600, 400), 'thumbnail': (100, 100, True)})
+
+class NewParamsModel(models.Model):
+    """all previous features in one declaration"""
+    image  = StdImageField(upload_to=upload_to, blank=True,
+                           variations={'large': (600, 400), 'thumbnail': (100, 100, True), 'resized': (300, 200)})
+
+    image1 = StdImageField(upload_to=upload_to, blank=True,
+                           thumbnail_size=(100, 100, True),
+                           variations={'large': {"width": 600, "height": 400}, 'resized': (300, 200)})
+
+    image2 = StdImageField(upload_to=upload_to, blank=True,
+                           thumbnail_size=(100, 100, True),
+                           size=(300,200),
+                           variations={'large': {"width": 600, "height": 400}})

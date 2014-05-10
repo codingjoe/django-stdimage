@@ -119,6 +119,13 @@ class StdImageField(ImageField):
 
     attr_class = StdImageFieldFile
 
+    def_variation = {
+        'width': float('inf'),
+        'height': float('inf'),
+        'crop': False,
+        'resample': Image.ANTIALIAS
+    }
+
     def __init__(self, verbose_name=None, name=None, size=None, variations={},
         min_size=None, max_size=None, thumbnail_size=None, *args, **kwargs):
         """
@@ -127,45 +134,35 @@ class StdImageField(ImageField):
         :param variations: size variations of the image
         :rtype variations: StdImageField
         """
-        def_variation = {
-            'width': float('inf'),
-            'height': float('inf'),
-            'crop': False,
-            'resample': Image.ANTIALIAS
-        }
         self.variations = {}
         self.min_size = [0, 0]
         self.max_size = max_size or [float('inf'), float('inf')]
 
         if thumbnail_size:
-            self.variations["thumbnail"] = {
-                "name": "thumbnail",
-                "width": thumbnail_size[0],
-                "height": thumbnail_size[1],
-                "crop": thumbnail_size[2] if len(thumbnail_size) > 2 else False,
-                'resample': Image.ANTIALIAS
-            }
+            self.add_variation("thumbnail", thumbnail_size)
+
         if size:
-            self.variations["resized"] = {
-                "name": "resized",
-                "width": size[0],
-                "height": size[1],
-                "crop": size[2] if len(size) > 2 else False,
-                'resample': Image.ANTIALIAS
-            }
-        for nm, params in list(variations.items()):
-            variation = def_variation.copy()
-            variation.update(params)
-            variation["name"] = nm
-            self.variations[nm] = variation
+            self.add_variation("resized", thumbnail_size)
+
+        for nm, prm in list(variations.items()):
+            self.add_variation(nm, prm)
 
         if 'django.contrib.admin' in settings.INSTALLED_APPS and 'admin' not in self.variations:
-            self.variations['admin'] = {'name': 'admin', 'width': 100, 'height': 100,
-                                        'crop': False, 'resample': Image.NEAREST}
+            self.add_variation('admin', {'width': 100, 'height': 100, 'crop': False, 'resample': Image.NEAREST})
+
         self.min_size[0] = max(self.variations.values(), default=0, key=lambda x: x["width"])
         self.min_size[1] = max(self.variations.values(), default=0, key=lambda x: x["height"])
 
         super(StdImageField, self).__init__(verbose_name, name, *args, **kwargs)
+
+    def add_variation(self, name, params):
+        variation = self.def_variation.copy()
+        if isinstance(params, (list, tuple)):
+            variation.update(dict(zip(("width", "height", "crop"), params)))
+        else:
+            variation.update(params)
+        variation["name"] = name
+        self.variations[name] = variation
 
     def set_variations(self, instance=None, **kwargs):
         """

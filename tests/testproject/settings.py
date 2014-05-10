@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 
+SECRET_KEY = '5@ue^&26720sPOIAdg01k%!v2ulhf_sjc6-$d1'
+
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
+
+ALLOWED_HOSTS = []
 
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = 'testproject.db'
@@ -16,8 +20,6 @@ MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 MEDIA_URL = '/media/'
 
 ADMIN_MEDIA_PREFIX = '/admin_media/'
-
-SECRET_KEY = 'x'
 
 SITE_ID = 1
 
