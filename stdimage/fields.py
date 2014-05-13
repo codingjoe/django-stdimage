@@ -138,11 +138,8 @@ class StdImageField(ImageField):
         self.min_size = [0, 0]
         self.max_size = max_size or [float('inf'), float('inf')]
 
-        if thumbnail_size:
-            self.add_variation("thumbnail", thumbnail_size)
-
-        if size:
-            self.add_variation("resized", thumbnail_size)
+        self.add_variation("thumbnail", thumbnail_size)
+        self.add_variation("resized", size)
 
         for nm, prm in list(variations.items()):
             self.add_variation(nm, prm)
@@ -156,6 +153,7 @@ class StdImageField(ImageField):
         super(StdImageField, self).__init__(verbose_name, name, *args, **kwargs)
 
     def add_variation(self, name, params):
+        if params is None: return
         variation = self.def_variation.copy()
         if isinstance(params, (list, tuple)):
             variation.update(dict(zip(("width", "height", "crop"), params)))
