@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from io import StringIO
+from io import BytesIO
 from django.db.models import signals
 from django.db.models.fields.files import ImageField, ImageFileDescriptor, ImageFieldFile
 from django.core.files.base import ContentFile
@@ -13,9 +13,9 @@ try:
 except ImportError:
     from PIL import Image, ImageOps
 
-from forms import StdImageFormField
-from widgets import DelAdminFileWidget
-from utils import upload_to_class_name_dir, upload_to_class_name_dir_uuid, upload_to_uuid
+from .forms import StdImageFormField
+from .widgets import DelAdminFileWidget
+from .utils import upload_to_class_name_dir, upload_to_class_name_dir_uuid, upload_to_uuid
 
 UPLOAD_TO_CLASS_NAME = upload_to_class_name_dir
 UPLOAD_TO_CLASS_NAME_UUID = upload_to_class_name_dir_uuid
@@ -72,7 +72,7 @@ class StdImageFieldFile(ImageFieldFile):
             else:
                 img.thumbnail((variation['width'], variation['height']), resample=resample)
         variation_name = self.get_variation_name(self.instance, self.field, variation)
-        file_buffer = StringIO()
+        file_buffer = BytesIO()
         format = self.get_file_extension(name).lower().replace('jpg', 'jpeg')
         img.save(file_buffer, format)
         self.storage.save(variation_name, ContentFile(file_buffer.getvalue()))
@@ -134,7 +134,7 @@ class StdImageField(ImageField):
 
         for key, attr in variations.iteritems():
             if attr and isinstance(attr, (tuple, list)):
-                variation = dict(map(None, param_size, attr))
+                variation = dict(zip(param_size, attr))
                 variation['name'] = key
                 setattr(self, key, variation)
                 self.variations.append(variation)
@@ -217,7 +217,7 @@ class StdImageField(ImageField):
         super(StdImageField, self).validate(value, model_instance)
         if hasattr(value, 'file'):  # fails if file has been deleted.
             value.seek(0)
-            stream = StringIO(value.read())
+            stream = BytesIO(value.read())
             img = Image.open(stream)
             if img.size[0] < self.min_size['width'] or img.size[1] < self.min_size['height']:
                 raise ValidationError(
