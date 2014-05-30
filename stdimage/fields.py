@@ -72,7 +72,7 @@ class StdImageFieldFile(ImageFieldFile):
             else:
                 img.thumbnail((variation['width'], variation['height']), resample=resample)
         variation_name = self.get_variation_name(self.instance, self.field, variation)
-        file_buffer = BytesIO()
+        file_buffer = StringIO()
         format = self.get_file_extension(name).lower().replace('jpg', 'jpeg')
         img.save(file_buffer, format)
         self.storage.save(variation_name, ContentFile(file_buffer.getvalue()))
@@ -217,7 +217,7 @@ class StdImageField(ImageField):
         super(StdImageField, self).validate(value, model_instance)
         if hasattr(value, 'file'):  # fails if file has been deleted.
             value.seek(0)
-            stream = BytesIO(value.read())
+            stream = StringIO(value.read())
             img = Image.open(stream)
             if img.size[0] < self.min_size['width'] or img.size[1] < self.min_size['height']:
                 raise ValidationError(
