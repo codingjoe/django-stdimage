@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-from io import BytesIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from django.db.models import signals
 from django.db.models.fields.files import ImageField, ImageFileDescriptor, ImageFieldFile
 from django.core.files.base import ContentFile
