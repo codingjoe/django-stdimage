@@ -53,7 +53,7 @@ class StdImageFieldFile(ImageFieldFile):
         """
         Renders the image variations and saves them to the storage
         """
-        resample = variation['resample'] or Image.ANTIALIAS
+        resample = variation.get('resample', Image.ANTIALIAS)
 
         content.seek(0)
 
