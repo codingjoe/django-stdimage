@@ -88,9 +88,7 @@ class StdImageFieldFile(ImageFieldFile):
         name = field.name
         ext = cls.get_file_extension(name)
         file_name = name.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-        path = name.rsplit('/', 1)[0]
-
-        return os.path.join(path, '%s.%s.%s' % (file_name, variation['name'], ext))
+        return os.path.join('%s.%s.%s' % (file_name, variation['name'], ext))
 
     @staticmethod
     def get_file_extension(name):
@@ -102,7 +100,7 @@ class StdImageFieldFile(ImageFieldFile):
 
     def delete(self, save=True):
         for variation in self.field.variations:
-            variation_name = self.get_variation_name(self.name, variation)
+            variation_name = self.get_variation_name(self.instance, self.field, variation)
             self.storage.delete(variation_name)
 
         super(StdImageFieldFile, self).delete(save)
