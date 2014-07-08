@@ -100,7 +100,7 @@ class StdImageFieldFile(ImageFieldFile):
 
     def delete(self, save=True):
         for variation in self.field.variations:
-            variation_name = self.get_variation_name(self.name, variation)
+            variation_name = self.get_variation_name(self.instance, self.field, variation)
             self.storage.delete(variation_name)
 
         super(StdImageFieldFile, self).delete(save)
