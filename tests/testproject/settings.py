@@ -1,11 +1,31 @@
 # -*- coding: utf-8 -*-
+import django
 import os
+
+
+def versiontuple(v):
+    """
+    Convert a version string into a tuple, to be used for comparison purposes
+    :param v: The version string
+    :return:
+    """
+    return tuple(map(int, (v.split("."))))
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = 'testproject.db'
+
+# Django 1.4+ style of config
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'testproject.db'),
+    }
+}
 
 TIME_ZONE = 'America/Chicago'
 
@@ -42,10 +62,16 @@ INSTALLED_APPS = (
     'testproject',
 )
 
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-)
+if versiontuple(django.get_version()) < versiontuple("1.4.0"):
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.load_template_source',
+        'django.template.loaders.app_directories.load_template_source',
+    )
+else:
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.auth",
@@ -57,3 +83,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), "templates"),
 )
+
+

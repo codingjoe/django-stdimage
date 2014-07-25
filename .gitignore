@@ -3,3 +3,4 @@ django_stdimage.egg-info
 build/
 dist/
 .idea/
+env/
