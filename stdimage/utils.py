@@ -75,5 +75,6 @@ def pre_save_delete_callback(sender, instance, **kwargs):
             if isinstance(field, StdImageField):
                 obj_field = getattr(obj, field.name)
                 instance_field = getattr(instance, field.name)
-                if obj_field and not instance_field:
+                if obj_field and obj_field != instance_field:
                     obj_field.delete(False)
+
