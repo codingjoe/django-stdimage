@@ -75,10 +75,10 @@ class StdImageFieldFile(ImageFieldFile):
 
             if self.is_smaller(img, variation):
                 factor = 1
-                while (img.size[0] / factor
-                        > 2 * variation['width']
-                       and img.size[1] * 2 / factor
-                        > 2 * variation['height']):
+                while (img.size[0] / factor >
+                       2 * variation['width'] and
+                       img.size[1] * 2 / factor >
+                       2 * variation['height']):
                     factor *= 2
                 if factor > 1:
                     img.thumbnail(
@@ -156,7 +156,8 @@ class StdImageField(ImageField):
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
-                 create_variations_manually=False, force_min_size=False, *args, **kwargs):
+                 create_variations_manually=False, force_min_size=False,
+                 *args, **kwargs):
         """
         Standardized ImageField for Django
         Usage: StdImageField(upload_to='PATH',
