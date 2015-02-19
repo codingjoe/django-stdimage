@@ -83,5 +83,14 @@ class UUIDModel(models.Model):
     image = StdImageField(upload_to=UploadToUUID(path='img'))
 
 
+class ManualVariationsModel(models.Model):
+    """delays creation of 150x150 thumbnails until it is called manually"""
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'thumbnail': (150, 150, True)},
+        create_variations_manually=True
+    )
+
+
 post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)
 pre_save.connect(pre_save_delete_callback, sender=AdminDeleteModel)

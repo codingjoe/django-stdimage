@@ -37,20 +37,21 @@ class StdImageFieldFile(ImageFieldFile):
         super(StdImageFieldFile, self).save(name, content, save)
 
         if not self.field.create_variations_manually:
-            self.render_and_save_all_variations()
+            self.render_and_save_all_variations(content=content)
 
     @staticmethod
     def is_smaller(img, variation):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_and_save_all_variations(self):
+    def render_and_save_all_variations(self, content=None):
         """
         Renders all image variations and saves them to the storage
         """
         variations = self.field.variations
+        content = content or self.path
         for key, variation in variations.items():
-            self.render_and_save_variation(self, variation)
+            self.render_and_save_variation(content, variation)
 
     def render_and_save_variation(self, content, variation,
                                   replace=False):
@@ -66,7 +67,10 @@ class StdImageFieldFile(ImageFieldFile):
                 logger.info('File "{}" already exists.')
                 return variation_name
 
-        content.seek(0)
+        try:
+            content.seek(0)
+        except AttributeError:
+            pass
 
         resample = variation['resample']
 
