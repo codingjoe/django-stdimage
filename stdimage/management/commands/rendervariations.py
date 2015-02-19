@@ -61,7 +61,6 @@ class Command(BaseCommand):
                 prog.update(i)
                 for name, variation in field.variations.items():
                     field_file.render_and_save_variation(
-                        field_file.name,
                         field_file,
                         variation,
                         replace

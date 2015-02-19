@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 
 from .models import SimpleModel, ResizeModel, AdminDeleteModel,\
     ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,\
-    UUIDModel
+    UUIDModel, ManualVariationsModel
 
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
@@ -141,6 +141,40 @@ class TestModel(TestStdImage):
         })
         path = os.path.join(IMG_DIR, 'image.gif')
         assert not os.path.exists(path)
+
+    def test_manual_variations(self):
+        instance = ManualVariationsModel.objects.create(
+            image=self.fixtures['600x400.jpg']
+        )
+
+        source_file = os.path.join(FIXTURE_DIR, '600x400.jpg')
+
+        self.assertTrue(os.path.exists(os.path.join(IMG_DIR, 'image.jpg')))
+        self.assertEqual(instance.image.width, 600)
+        self.assertEqual(instance.image.height, 400)
+
+        path = os.path.join(IMG_DIR, 'image.jpg')
+        assert filecmp.cmp(source_file, path)
+
+        path = os.path.join(IMG_DIR, 'image.thumbnail.jpg')
+        self.assertFalse(os.path.exists(path))
+
+        file = getattr(instance, 'image')
+        assert file
+        file.render_and_save_all_variations()
+
+        assert os.path.exists(path)
+
+        self.assertTrue(os.path.exists(
+            os.path.join(IMG_DIR, 'image.thumbnail.jpg'))
+        )
+        self.assertEqual(instance.image.thumbnail.width, 150)
+        self.assertLessEqual(instance.image.thumbnail.height, 150)
+
+        self.assertFalse(filecmp.cmp(
+            source_file,
+            os.path.join(IMG_DIR, 'image.thumbnail.jpg'))
+        )
 
 
 class TestUtils(TestStdImage):

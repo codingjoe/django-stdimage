@@ -36,18 +36,27 @@ class StdImageFieldFile(ImageFieldFile):
     def save(self, name, content, save=True):
         super(StdImageFieldFile, self).save(name, content, save)
 
-        for key, variation in self.field.variations.items():
-            self.render_and_save_variation(name, content, variation)
+        if not self.field.create_variations_manually:
+            self.render_and_save_all_variations(content=content)
 
     @staticmethod
     def is_smaller(img, variation):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_and_save_variation(self, name, content, variation,
+    def render_and_save_all_variations(self, content=None):
+        """
+        Renders all image variations and saves them to the storage
+        """
+        variations = self.field.variations
+        content = content or self.path
+        for key, variation in variations.items():
+            self.render_and_save_variation(content, variation)
+
+    def render_and_save_variation(self, content, variation,
                                   replace=False):
         """
-        Renders the image variations and saves them to the storage
+        Renders an image variation and saves it to the storage
         """
         variation_name = self.get_variation_name(self.name, variation['name'])
         if self.storage.exists(variation_name):
@@ -58,7 +67,10 @@ class StdImageFieldFile(ImageFieldFile):
                 logger.info('File "{}" already exists.')
                 return variation_name
 
-        content.seek(0)
+        try:
+            content.seek(0)
+        except AttributeError:
+            pass
 
         resample = variation['resample']
 
@@ -67,10 +79,10 @@ class StdImageFieldFile(ImageFieldFile):
 
             if self.is_smaller(img, variation):
                 factor = 1
-                while (img.size[0] / factor
-                        > 2 * variation['width']
-                       and img.size[1] * 2 / factor
-                        > 2 * variation['height']):
+                while (img.size[0] / factor >
+                       2 * variation['width'] and
+                       img.size[1] * 2 / factor >
+                       2 * variation['height']):
                     factor *= 2
                 if factor > 1:
                     img.thumbnail(
@@ -148,7 +160,8 @@ class StdImageField(ImageField):
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
-                 force_min_size=False, *args, **kwargs):
+                 create_variations_manually=False, force_min_size=False,
+                 *args, **kwargs):
         """
         Standardized ImageField for Django
         Usage: StdImageField(upload_to='PATH',
@@ -162,6 +175,7 @@ class StdImageField(ImageField):
             raise TypeError('"variations" must be of type dict.')
         self._variations = variations
         self.force_min_size = force_min_size
+        self.create_variations_manually = create_variations_manually
         self.variations = {}
 
         for nm, prm in list(variations.items()):
