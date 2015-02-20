@@ -59,14 +59,14 @@ class StdImageFieldFile(ImageFieldFile):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_variations(self, content=None):
+    def render_variations(self, content=None, replace=False):
         """
         Renders all image variations and saves them to the storage
         """
         variations = self.field.variations
         content = content or self.file
         for key, variation in variations.items():
-            self.render_variation(content, variation)
+            self.render_variation(content, variation, replace)
 
     def render_variation(self, content, variation, replace=False):
         """
