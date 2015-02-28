@@ -92,7 +92,7 @@ class StdImageFieldFile(ImageFieldFile):
                     )
 
             with BytesIO() as file_buffer:
-                img.save(file_buffer, file_format)
+                img.save(file_buffer, file_format, quality=variation['quality'])
                 f = ContentFile(file_buffer.getvalue())
                 self.storage.save(variation_name, f)
         return variation_name
@@ -144,7 +144,8 @@ class StdImageField(ImageField):
         'width': float('inf'),
         'height': float('inf'),
         'crop': False,
-        'resample': Image.ANTIALIAS
+        'resample': Image.ANTIALIAS,
+        'quality': 75,
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
@@ -181,7 +182,7 @@ class StdImageField(ImageField):
     def add_variation(self, name, params):
         variation = self.def_variation.copy()
         if isinstance(params, (list, tuple)):
-            variation.update(dict(zip(("width", "height", "crop"), params)))
+            variation.update(dict(zip(("width", "height", "crop", "quality"), params)))
         else:
             variation.update(params)
         variation["name"] = name
