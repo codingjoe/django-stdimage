@@ -167,18 +167,27 @@ Async image processing
 
  tasks.py
 
+
     .. code :: python
 
-        from django.db.models.loading import get_model
+        try:
+            from django.apps import apps
+            get_model = apps.get_model
+        except ImportError:
+            from django.db.models.loading import get_model
+
+        from celery import shared_task
+
         from stdimage.utils import render_variations
 
-        @app.task()
-        def process_image(app_label, model_name, field_name, file_name):
-            render_variations(app_label, model_name, field_name, file_name)
-            model_class = get_model(app_label, models_name)
-            obj = model_class.objects.get(**{field_name: file_name})
+
+        @shared_task
+        def process_photo_image(file_name, variations, storage):
+            render_variations(file_name, variations, replace=True, storage=storage)
+            obj = get_model('myapp', 'Photo').objects.get(image=file_name)
             obj.processed = True
             obj.save()
+
 
  models.py
 
@@ -186,13 +195,18 @@ Async image processing
 
         from django.db import models
         from stdimage.models import StdImageField
+        from stdimage.utils import UploadToClassNameDir
+        
+        from tasks import process_photo_image
 
-        def image_processor(**kwargs):
-            process_image.delay(**kwargs)
+        def image_processor(file_name, variations, storage):
+            process_photo_image.delay(file_name, variations, storage)
             return False  # prevent default rendering
 
         class AsyncImageModel(models.Model)
             image = StdImageField(
+                # above task definition can only handle one model object per image filename
+                db_index=True, unique=True, 
                 upload_to=UploadToClassNameDir(),
                 render_variations=image_processor  # pass boolean or callable
             )
