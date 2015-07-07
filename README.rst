@@ -234,3 +234,8 @@ Multi processing
 Testing
 -------
 To run the tests simply run ``python setup.py test``
+
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/codingjoe/django-stdimage
+   :target: https://gitter.im/codingjoe/django-stdimage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
