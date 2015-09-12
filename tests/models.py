@@ -118,5 +118,12 @@ class UtilVariationsModel(models.Model):
     )
 
 
+class ThumbnailWithoutDirectoryModel(models.Model):
+    """Save into a generated filename that does not contain any '/' char"""
+    image = StdImageField(
+        upload_to=lambda instance, filename: 'custom.gif',
+        variations={'thumbnail': {'width': 150, 'height': 150}},
+    )
+
 post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)
 pre_save.connect(pre_save_delete_callback, sender=AdminDeleteModel)

@@ -115,20 +115,14 @@ class StdImageFieldFile(ImageFieldFile):
     @classmethod
     def get_variation_name(cls, file_name, variation_name):
         """Return the variation file name based on the variation."""
-        ext = cls.get_file_extension(file_name)
-        path = file_name.rsplit('/', 1)[0]
-        file_name = file_name.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+        path, ext = os.path.splitext(file_name)
+        path, file_name = os.path.split(path)
         file_name = '{file_name}.{variation_name}{extension}'.format(**{
             'file_name': file_name,
             'variation_name': variation_name,
             'extension': ext,
         })
         return os.path.join(path, file_name)
-
-    @staticmethod
-    def get_file_extension(filename):
-        """Return the file extension."""
-        return os.path.splitext(filename)[1].lower()
 
     def delete(self, save=True):
         self.delete_variations()

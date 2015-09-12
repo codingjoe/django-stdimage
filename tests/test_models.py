@@ -22,7 +22,8 @@ from .models import (
     SimpleModel, ResizeModel, AdminDeleteModel,
     ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,
     UUIDModel,
-    UtilVariationsModel)
+    UtilVariationsModel,
+    ThumbnailWithoutDirectoryModel)
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
 
@@ -143,6 +144,18 @@ class TestModel(TestStdImage):
         })
         path = os.path.join(IMG_DIR, 'image.gif')
         assert not os.path.exists(path)
+
+    def test_thumbnail_save_without_directory(self):
+        obj = ThumbnailWithoutDirectoryModel.objects.create(
+            image=self.fixtures['100.gif']
+        )
+        obj.save()
+        # Our model saves the images directly into the MEDIA_ROOT directory
+        # not IMG_DIR, under a custom name
+        original = os.path.join(settings.MEDIA_ROOT, 'custom.gif')
+        thumbnail = os.path.join(settings.MEDIA_ROOT, 'custom.thumbnail.gif')
+        assert os.path.exists(original)
+        assert os.path.exists(thumbnail)
 
 
 class TestUtils(TestStdImage):
