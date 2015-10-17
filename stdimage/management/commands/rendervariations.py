@@ -63,6 +63,7 @@ class Command(BaseCommand):
                 file_name=file_name,
                 variations=field.variations,
                 replace=replace,
+                storage=field.storage
             )
             for file_name in images
         ]
@@ -79,6 +80,7 @@ class Command(BaseCommand):
                 file_name=file_name,
                 variations=field.variations,
                 replace=replace,
+                storage=field.storage
             )
             for file_name in images
         ]
