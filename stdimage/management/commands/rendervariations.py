@@ -16,8 +16,8 @@ is_pypy = '__pypy__' in sys.builtin_module_names
 BAR = None
 
 
-class MemoryUsageWidget(progressbar.widgets.Widget):
-    def update(self, pbar):
+class MemoryUsageWidget(progressbar.widgets.WidgetBase):
+    def __call__(self, progress, data):
         return 'RAM: {0:10.1f} MB'.format(
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
         )

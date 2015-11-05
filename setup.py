@@ -53,7 +53,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'pillow>=2.5',
-        'progressbar2>=2.7,<3.0.0',
+        'progressbar2>=3.0.0',
     ],
     cmdclass={'test': PyTest},
 )
