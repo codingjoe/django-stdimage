@@ -25,6 +25,13 @@ INSTALLED_APPS = (
 
 DEFAULT_FILE_STORAGE = 'tests.storage.MyFileSystemStorage'
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+    }
+]
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

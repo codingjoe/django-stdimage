@@ -28,6 +28,10 @@ class Command(BaseCommand):
     args = '<app.model.field app.model.field>'
 
     def add_arguments(self, parser):
+        parser.add_argument('field_path',
+                            nargs='+',
+                            type=str,
+                            help='<app.model.field app.model.field>')
         parser.add_argument('--replace',
                             action='store_true',
                             dest='replace',
@@ -36,7 +40,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         replace = options.get('replace')
-        for route in args:
+        if len(options['field_path']):
+            routes = options['field_path']
+        else:
+            routes = [options['field_path']]
+        for route in routes:
             app_label, model_name, field_name = route.rsplit('.')
             model_class = apps.get_model(app_label, model_name)
             field = model_class._meta.get_field(field_name)
