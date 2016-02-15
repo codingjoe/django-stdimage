@@ -6,11 +6,11 @@ import sys
 import traceback
 from multiprocessing import Pool, cpu_count
 
-import progressbar
 from django.apps import apps
 from django.core.files.storage import get_storage_class
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 
+import progressbar
 from stdimage.utils import render_variations
 
 BAR = None
@@ -45,7 +45,12 @@ class Command(BaseCommand):
         else:
             routes = [options['field_path']]
         for route in routes:
-            app_label, model_name, field_name = route.rsplit('.')
+            try:
+                app_label, model_name, field_name = route.rsplit('.')
+            except ValueError:
+                raise CommandError("Error parsing field_path '{}'. Use format "
+                                   "<app.model.field app.model.field>."
+                                   .format(route))
             model_class = apps.get_model(app_label, model_name)
             field = model_class._meta.get_field(field_name)
 

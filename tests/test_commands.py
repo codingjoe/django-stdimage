@@ -1,9 +1,9 @@
 import os
 import time
 
-import pytest
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 
+import pytest
 from tests.models import ManualVariationsModel, MyStorageModel, ThumbnailModel
 
 
@@ -73,3 +73,14 @@ class TestRenderVariations(object):
             'tests.MyStorageModel.image'
         )
         assert os.path.exists(file_path)
+
+    def test_invalid_field_path(self):
+        with pytest.raises(CommandError) as exc_info:
+            call_command(
+                'rendervariations',
+                'MyStorageModel.image'
+            )
+
+        error_message = "Error parsing field_path 'MyStorageModel.image'. "\
+                        "Use format <app.model.field app.model.field>."
+        assert str(exc_info.value) == error_message
