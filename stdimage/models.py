@@ -37,7 +37,8 @@ class StdImageFieldFile(ImageFieldFile):
            and not self.field.render_variations:
             return
 
-        self.render_field_variations(self.name, self.field, False, self.storage)
+        self.render_field_variations(self.name, self.field, False,
+                                     self.storage)
 
     @staticmethod
     def is_smaller(img, variation):

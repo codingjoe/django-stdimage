@@ -100,7 +100,7 @@ def finish_progressbar():
 
 def render_field_variations(kwargs):
     try:
-        storage = kwargs['field'].storage.deconstruct()[0];
+        storage = kwargs['field'].storage.deconstruct()[0]
         kwargs['storage'] = get_storage_class(storage)()
         StdImageFieldFile.render_field_variations(**kwargs)
 
