@@ -31,31 +31,43 @@ class StdImageFieldFile(ImageFieldFile):
 
     def save(self, name, content, save=True):
         super(StdImageFieldFile, self).save(name, content, save)
-        render_variations = self.field.render_variations
-        if callable(render_variations):
-            render_variations = render_variations(
-                file_name=self.name,
-                variations=self.field.variations,
-                storage=self.storage,
-            )
-        if not isinstance(render_variations, bool):
-            msg = (
-                '"render_variations" callable expects a boolean return value,'
-                ' but got %s'
-                ) % type(render_variations)
-            raise TypeError(msg)
-        if render_variations:
-            self.render_variations()
+
+        """ Skip rendering if render_variations set False """
+        if isinstance(self.field.render_variations, bool) \
+           and not self.field.render_variations:
+            return
+
+        self.render_field_variations(self.name, self.field, False, self.storage)
 
     @staticmethod
     def is_smaller(img, variation):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_variations(self, replace=False):
-        """Render all image variations and saves them to the storage."""
-        for _, variation in self.field.variations.items():
-            self.render_variation(self.name, variation, replace, self.storage)
+    @classmethod
+    def render_field_variations(cls, file_name, field, replace=False,
+                                storage=default_storage):
+        """
+        Force render field variations. If field's render_variations is false
+        then render with default render_variation function.
+        """
+        if callable(field.render_variations):
+            render_default = field.render_variations(
+                file_name=file_name,
+                variations=field.variations,
+                storage=storage
+            )
+            if not isinstance(render_default, bool):
+                msg = (
+                    '"render_variations" callable expects a boolean return'
+                    '  value, but got %s'
+                    ) % type(render_default)
+                raise TypeError(msg)
+            if not render_default:
+                return
+
+        for _, variation in field.variations.items():
+            cls.render_variation(file_name, variation, replace, storage)
 
     @classmethod
     def render_variation(cls, file_name, variation, replace=False,
