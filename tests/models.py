@@ -174,5 +174,33 @@ class CustomRenderVariationsModel(models.Model):
         render_variations=custom_render_variations,
     )
 
+
+def custom_render_variations_not_returning_bool(file_name, variations,
+                                                storage):
+    """Save files as is BUT do not return bool."""
+    for _, variation in variations.items():
+        variation_name = StdImageFieldFile.get_variation_name(
+            file_name,
+            variation['name']
+        )
+        if storage.exists(variation_name):
+            storage.delete(variation_name)
+
+        with storage.open(file_name) as f:
+            with Image.open(f) as img, BytesIO() as file_buffer:
+                img.save(file_buffer, 'JPEG')
+                f = ContentFile(file_buffer.getvalue())
+                storage.save(variation_name, f)
+
+
+class CustomRenderVariationsNotReturningBoolModel(models.Model):
+    """Must raise TypeError when create."""
+
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'thumbnail': (150, 150)},
+        render_variations=custom_render_variations_not_returning_bool,
+    )
+
 post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)
 pre_save.connect(pre_save_delete_callback, sender=AdminDeleteModel)

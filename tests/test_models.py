@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 import filecmp
 import os
+import pytest
 import shutil
 import uuid
 
@@ -25,7 +26,8 @@ from .models import (
     UUIDModel,
     UtilVariationsModel,
     ThumbnailWithoutDirectoryModel,
-    CustomRenderVariationsModel)  # NoQA
+    CustomRenderVariationsModel,
+    CustomRenderVariationsNotReturningBoolModel)  # NoQA
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
 
@@ -166,6 +168,17 @@ class TestModel(TestStdImage):
         # Image size must be 100x100 despite variations settings
         assert instance.image.thumbnail.width == 100
         assert instance.image.thumbnail.height == 100
+
+    def test_custom_render_variations_not_returning_bool(self):
+        with pytest.raises(TypeError) as exc_info:
+            CustomRenderVariationsNotReturningBoolModel.objects.create(
+                image=self.fixtures['600x400.jpg']
+            )
+        error_message = (
+            '"render_variations" should return a boolean,'
+            ' but returned %s'
+        ) % type(None)
+        assert str(exc_info.value) == error_message
 
 
 class TestUtils(TestStdImage):
