@@ -143,7 +143,7 @@ class ThumbnailWithoutDirectoryModel(models.Model):
 
 
 def custom_render_variations(file_name, variations, storage):
-    """ Resize image to 100x100 """
+    """Resize image to 100x100."""
     for _, variation in variations.items():
         variation_name = StdImageFieldFile.get_variation_name(
             file_name,
@@ -166,7 +166,7 @@ def custom_render_variations(file_name, variations, storage):
 
 
 class CustomRenderVariationsModel(models.Model):
-    """ Use custom render_variations """
+    """Use custom render_variations."""
     image = StdImageField(
         upload_to=UploadTo(name='image', path='img'),
         variations={'thumbnail': (150, 150)},

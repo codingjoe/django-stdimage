@@ -32,7 +32,7 @@ class StdImageFieldFile(ImageFieldFile):
     def save(self, name, content, save=True):
         super(StdImageFieldFile, self).save(name, content, save)
 
-        """ Skip rendering if render_variations set False """
+        # Skip rendering if render_variations set False
         if isinstance(self.field.render_variations, bool) \
            and not self.field.render_variations:
             return
@@ -60,9 +60,9 @@ class StdImageFieldFile(ImageFieldFile):
             )
             if not isinstance(render_default, bool):
                 msg = (
-                    '"render_variations" callable expects a boolean return'
-                    '  value, but got %s'
-                    ) % type(render_default)
+                    '"render_variations" should return a boolean,'
+                    ' but returned %s'
+                ) % type(render_default)
                 raise TypeError(msg)
             if not render_default:
                 return

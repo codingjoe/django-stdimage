@@ -95,13 +95,14 @@ class TestRenderVariations(object):
         )
         file_path = obj.image.thumbnail.path
         assert os.path.exists(file_path)
-
-        before = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+        with open(file_path, 'rb') as f:
+            before = hashlib.md5(f.read()).hexdigest()
         call_command(
             'rendervariations',
             'tests.CustomRenderVariationsModel.image',
             replace=True
         )
         assert os.path.exists(file_path)
-        after = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+        with open(file_path, 'rb') as f:
+            after = hashlib.md5(f.read()).hexdigest()
         assert before == after

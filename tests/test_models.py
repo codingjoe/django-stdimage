@@ -164,8 +164,8 @@ class TestModel(TestStdImage):
             image=self.fixtures['600x400.jpg']
         )
         # Image size must be 100x100 despite variations settings
-        self.assertEqual(instance.image.thumbnail.width, 100)
-        self.assertEqual(instance.image.thumbnail.height, 100)
+        assert instance.image.thumbnail.width == 100
+        assert instance.image.thumbnail.height == 100
 
 
 class TestUtils(TestStdImage):
