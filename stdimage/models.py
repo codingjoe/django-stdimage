@@ -49,8 +49,10 @@ class StdImageFieldFile(ImageFieldFile):
     def render_field_variations(cls, file_name, field, replace=False,
                                 storage=default_storage):
         """
-        Force render field variations. If field's render_variations is false
-        then render with default render_variation function.
+        Force render field variations.
+
+        If field's render_variations is false then render with default
+        render_variation function.
         """
         if callable(field.render_variations):
             render_default = field.render_variations(

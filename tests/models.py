@@ -167,6 +167,7 @@ def custom_render_variations(file_name, variations, storage):
 
 class CustomRenderVariationsModel(models.Model):
     """Use custom render_variations."""
+
     image = StdImageField(
         upload_to=UploadTo(name='image', path='img'),
         variations={'thumbnail': (150, 150)},
