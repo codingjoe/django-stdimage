@@ -1,8 +1,13 @@
+from io import BytesIO
+
+from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
+from PIL import Image
 
 from stdimage import StdImageField
+from stdimage.models import StdImageFieldFile
 from stdimage.utils import (UploadTo, UploadToAutoSlugClassNameDir,
                             UploadToUUID, pre_delete_delete_callback,
                             pre_save_delete_callback, render_variations)
@@ -134,6 +139,67 @@ class ThumbnailWithoutDirectoryModel(models.Model):
     image = StdImageField(
         upload_to=lambda instance, filename: 'custom.gif',
         variations={'thumbnail': {'width': 150, 'height': 150}},
+    )
+
+
+def custom_render_variations(file_name, variations, storage):
+    """Resize image to 100x100."""
+    for _, variation in variations.items():
+        variation_name = StdImageFieldFile.get_variation_name(
+            file_name,
+            variation['name']
+        )
+        if storage.exists(variation_name):
+            storage.delete(variation_name)
+
+        with storage.open(file_name) as f:
+            with Image.open(f) as img:
+                size = 100, 100
+                img = img.resize(size)
+
+                with BytesIO() as file_buffer:
+                    img.save(file_buffer, 'JPEG')
+                    f = ContentFile(file_buffer.getvalue())
+                    storage.save(variation_name, f)
+
+    return False
+
+
+class CustomRenderVariationsModel(models.Model):
+    """Use custom render_variations."""
+
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'thumbnail': (150, 150)},
+        render_variations=custom_render_variations,
+    )
+
+
+def custom_render_variations_not_returning_bool(file_name, variations,
+                                                storage):
+    """Save files as is BUT do not return bool."""
+    for _, variation in variations.items():
+        variation_name = StdImageFieldFile.get_variation_name(
+            file_name,
+            variation['name']
+        )
+        if storage.exists(variation_name):
+            storage.delete(variation_name)
+
+        with storage.open(file_name) as f:
+            with Image.open(f) as img, BytesIO() as file_buffer:
+                img.save(file_buffer, 'JPEG')
+                f = ContentFile(file_buffer.getvalue())
+                storage.save(variation_name, f)
+
+
+class CustomRenderVariationsNotReturningBoolModel(models.Model):
+    """Must raise TypeError when create."""
+
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'thumbnail': (150, 150)},
+        render_variations=custom_render_variations_not_returning_bool,
     )
 
 post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)

@@ -1,10 +1,14 @@
+import hashlib
 import os
 import time
 
 import pytest
 from django.core.management import CommandError, call_command
 
-from tests.models import ManualVariationsModel, MyStorageModel, ThumbnailModel
+from tests.models import (
+    CustomRenderVariationsModel, ManualVariationsModel, MyStorageModel,
+    ThumbnailModel
+)
 
 
 @pytest.mark.django_db
@@ -84,3 +88,21 @@ class TestRenderVariations(object):
         error_message = "Error parsing field_path 'MyStorageModel.image'. "\
                         "Use format <app.model.field app.model.field>."
         assert str(exc_info.value) == error_message
+
+    def test_custom_render_variations(self, image_upload_file):
+        obj = CustomRenderVariationsModel.objects.create(
+            image=image_upload_file
+        )
+        file_path = obj.image.thumbnail.path
+        assert os.path.exists(file_path)
+        with open(file_path, 'rb') as f:
+            before = hashlib.md5(f.read()).hexdigest()
+        call_command(
+            'rendervariations',
+            'tests.CustomRenderVariationsModel.image',
+            replace=True
+        )
+        assert os.path.exists(file_path)
+        with open(file_path, 'rb') as f:
+            after = hashlib.md5(f.read()).hexdigest()
+        assert before == after

@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 import filecmp
 import os
+import pytest
 import shutil
 import uuid
 
@@ -24,7 +25,9 @@ from .models import (
     ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,
     UUIDModel,
     UtilVariationsModel,
-    ThumbnailWithoutDirectoryModel)  # NoQA
+    ThumbnailWithoutDirectoryModel,
+    CustomRenderVariationsModel,
+    CustomRenderVariationsNotReturningBoolModel)  # NoQA
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
 
@@ -157,6 +160,25 @@ class TestModel(TestStdImage):
         thumbnail = os.path.join(settings.MEDIA_ROOT, 'custom.thumbnail.gif')
         assert os.path.exists(original)
         assert os.path.exists(thumbnail)
+
+    def test_custom_render_variations(self):
+        instance = CustomRenderVariationsModel.objects.create(
+            image=self.fixtures['600x400.jpg']
+        )
+        # Image size must be 100x100 despite variations settings
+        assert instance.image.thumbnail.width == 100
+        assert instance.image.thumbnail.height == 100
+
+    def test_custom_render_variations_not_returning_bool(self):
+        with pytest.raises(TypeError) as exc_info:
+            CustomRenderVariationsNotReturningBoolModel.objects.create(
+                image=self.fixtures['600x400.jpg']
+            )
+        error_message = (
+            '"render_variations" should return a boolean,'
+            ' but returned %s'
+        ) % type(None)
+        assert str(exc_info.value) == error_message
 
 
 class TestUtils(TestStdImage):

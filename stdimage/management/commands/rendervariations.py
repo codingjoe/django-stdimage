@@ -11,7 +11,7 @@ from django.apps import apps
 from django.core.files.storage import get_storage_class
 from django.core.management import BaseCommand, CommandError
 
-from stdimage.utils import render_variations
+from stdimage.models import StdImageFieldFile
 
 BAR = None
 
@@ -71,9 +71,8 @@ class Command(BaseCommand):
         args = [
             dict(
                 file_name=file_name,
-                variations=field.variations,
+                field=field,
                 replace=replace,
-                storage=field.storage.deconstruct()[0],
             )
             for file_name in images
         ]
@@ -101,8 +100,10 @@ def finish_progressbar():
 
 def render_field_variations(kwargs):
     try:
-        kwargs['storage'] = get_storage_class(kwargs['storage'])()
-        render_variations(**kwargs)
+        storage = kwargs['field'].storage.deconstruct()[0]
+        kwargs['storage'] = get_storage_class(storage)()
+        StdImageFieldFile.render_field_variations(**kwargs)
+
         global BAR
         BAR += 1
     except:
