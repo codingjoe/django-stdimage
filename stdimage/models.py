@@ -69,7 +69,7 @@ class StdImageFieldFile(ImageFieldFile):
             if not render_default:
                 return
 
-        for _, variation in field.variations.items():
+        for variation in field.variations.values():
             cls.render_variation(file_name, variation, replace, storage)
 
     @classmethod
