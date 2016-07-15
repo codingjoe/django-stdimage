@@ -52,13 +52,13 @@ class StdImageFieldFile(ImageFieldFile):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_variations(self, replace=False):
+    def render_variations(self, replace=True):
         """Render all image variations and saves them to the storage."""
         for _, variation in self.field.variations.items():
             self.render_variation(self.name, variation, replace, self.storage)
 
     @classmethod
-    def render_variation(cls, file_name, variation, replace=False,
+    def render_variation(cls, file_name, variation, replace=True,
                          storage=default_storage):
         """Render an image variation and saves it to the storage."""
         variation_name = cls.get_variation_name(file_name, variation['name'])
