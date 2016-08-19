@@ -9,5 +9,5 @@ pep8==1.7.0
 pep8-naming==0.4.1
 pre-commit==0.8.2
 py==1.4.31
-pytest==2.9.2
+pytest==3.0.0
 tox==2.3.1
