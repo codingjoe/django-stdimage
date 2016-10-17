@@ -174,5 +174,14 @@ class CustomRenderVariationsModel(models.Model):
     )
 
 
+class ProgressiveJpegModel(models.Model):
+    """Render progressive jpeg variation."""
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'progressive': {'width': 300, 'height': 200,
+                                    'is_progressive_jpeg': True}}
+    )
+
+
 post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)
 pre_save.connect(pre_save_delete_callback, sender=AdminDeleteModel)

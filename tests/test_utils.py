@@ -24,7 +24,9 @@ class TestRenderVariations(object):
                     'width': 150,
                     'height': 150,
                     'crop': True,
-                    'resample': Image.ANTIALIAS
+                    'resample': Image.ANTIALIAS,
+                    'is_progressive_jpeg': False,
+                    'progressive_jpeg_quality': 80
                 }
             }
         )

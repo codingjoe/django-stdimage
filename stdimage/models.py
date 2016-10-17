@@ -61,7 +61,9 @@ class StdImageFieldFile(ImageFieldFile):
     def render_variation(cls, file_name, variation, replace=False,
                          storage=default_storage):
         """Render an image variation and saves it to the storage."""
-        variation_name = cls.get_variation_name(file_name, variation['name'])
+        variation_name = cls.get_variation_name(
+            file_name, variation['name'],
+            is_progressive_jpeg=variation['is_progressive_jpeg'])
         if storage.exists(variation_name):
             if replace:
                 storage.delete(variation_name)
@@ -106,15 +108,25 @@ class StdImageFieldFile(ImageFieldFile):
                         )
 
                 with BytesIO() as file_buffer:
-                    img.save(file_buffer, file_format)
+                    if variation['is_progressive_jpeg']:
+                        # http://stackoverflow.com/a/21669827
+                        img.convert('RGB').save(
+                            file_buffer, "JPEG",
+                            quality=variation['progressive_jpeg_quality'],
+                            ptimize=True, progressive=True)
+                    else:
+                        img.save(file_buffer, file_format)
                     f = ContentFile(file_buffer.getvalue())
                     storage.save(variation_name, f)
         return variation_name
 
     @classmethod
-    def get_variation_name(cls, file_name, variation_name):
+    def get_variation_name(cls, file_name, variation_name,
+                           is_progressive_jpeg=False):
         """Return the variation file name based on the variation."""
         path, ext = os.path.splitext(file_name)
+        if is_progressive_jpeg:
+            ext = "jpg"
         path, file_name = os.path.split(path)
         file_name = '{file_name}.{variation_name}{extension}'.format(**{
             'file_name': file_name,
@@ -158,7 +170,9 @@ class StdImageField(ImageField):
         'width': float('inf'),
         'height': float('inf'),
         'crop': False,
-        'resample': Image.ANTIALIAS
+        'resample': Image.ANTIALIAS,
+        'is_progressive_jpeg': False,
+        'progressive_jpeg_quality': 80
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
@@ -168,7 +182,9 @@ class StdImageField(ImageField):
         Standardized ImageField for Django.
 
         Usage: StdImageField(upload_to='PATH',
-         variations={'thumbnail': {"width", "height", "crop", "resample"}})
+         variations={'thumbnail': {"width", "height", "crop", "resample",
+                                   "is_progressive_jpeg",
+                                   "progressive_jpeg_quality"}})
         :param variations: size variations of the image
         :rtype variations: StdImageField
         :param render_variations: boolean or callable that returns a boolean.
