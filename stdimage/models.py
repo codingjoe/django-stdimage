@@ -111,7 +111,7 @@ class StdImageFieldFile(ImageFieldFile):
                         img.convert('RGB').save(
                             file_buffer, "JPEG",
                             quality=variation['progressive_jpeg_quality'],
-                            ptimize=True, progressive=True)
+                            optimize=True, progressive=True)
                     else:
                         img.save(file_buffer, file_format)
                     f = ContentFile(file_buffer.getvalue())
