@@ -148,14 +148,16 @@ class TestModel(TestStdImage):
         assert not os.path.exists(path)
 
     def test_progressive_jpeg_from_jpeg(self):
-        ProgressiveJpegModel.objects.create(
+        instance = ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.jpg']
         )
         progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
         assert os.path.exists(progressive_path)
 
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
+
     def test_progressive_jpeg_from_png(self):
-        ProgressiveJpegModel.objects.create(
+        instance = ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.png']
         )
         progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
@@ -164,8 +166,10 @@ class TestModel(TestStdImage):
         progressive_path = os.path.join(IMG_DIR, 'image.progressive.png')
         assert not os.path.exists(progressive_path)
 
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
+
     def test_progressive_jpeg_from_gif(self):
-        ProgressiveJpegModel.objects.create(
+        instance = ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.gif']
         )
         progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
@@ -173,6 +177,8 @@ class TestModel(TestStdImage):
 
         progressive_path = os.path.join(IMG_DIR, 'image.progressive.gif')
         assert not os.path.exists(progressive_path)
+
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
 
     def test_thumbnail_save_without_directory(self):
         obj = ThumbnailWithoutDirectoryModel.objects.create(
