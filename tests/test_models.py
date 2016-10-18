@@ -19,6 +19,7 @@ from django.core.files import File  # NoQA
 from django.test import TestCase  # NoQA
 from django.contrib.auth.models import User  # NoQA
 
+from stdimage.models import StdImageFieldFile  # NoQA
 from .models import (
     SimpleModel, ResizeModel, AdminDeleteModel,
     ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,
@@ -199,6 +200,23 @@ class TestModel(TestStdImage):
         # Image size must be 100x100 despite variations settings
         assert instance.image.thumbnail.width == 100
         assert instance.image.thumbnail.height == 100
+
+    def test_get_variation_name(self):
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name('foobar.png', 'test'),
+            'foobar.test.png')
+
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name('foobar.png',
+                                                 {'name': 'test'}),
+            'foobar.test.png')
+
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name(
+                'foobar.png',
+                {'name': 'test', 'is_progressive_jpeg': True}
+            ),
+            'foobar.test.jpg')
 
 
 class TestUtils(TestStdImage):

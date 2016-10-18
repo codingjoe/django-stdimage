@@ -61,9 +61,7 @@ class StdImageFieldFile(ImageFieldFile):
     def render_variation(cls, file_name, variation, replace=False,
                          storage=default_storage):
         """Render an image variation and saves it to the storage."""
-        variation_name = cls.get_variation_name(
-            file_name, variation['name'],
-            is_progressive_jpeg=variation['is_progressive_jpeg'])
+        variation_name = cls.get_variation_name(file_name, variation)
         if storage.exists(variation_name):
             if replace:
                 storage.delete(variation_name)
@@ -121,12 +119,18 @@ class StdImageFieldFile(ImageFieldFile):
         return variation_name
 
     @classmethod
-    def get_variation_name(cls, file_name, variation_name,
-                           is_progressive_jpeg=False):
+    def get_variation_name(cls, file_name, variation):
         """Return the variation file name based on the variation."""
+        if not isinstance(variation, dict):
+            # Just a variation name string.
+            variation_name = variation
+            variation = {}
+        else:
+            variation_name = variation['name']
+
         path, ext = os.path.splitext(file_name)
-        if is_progressive_jpeg:
-            ext = ".jpg"
+        if variation.get('is_progressive_jpeg', False):
+            ext = '.jpg'
         path, file_name = os.path.split(path)
         file_name = '{file_name}.{variation_name}{extension}'.format(**{
             'file_name': file_name,
@@ -140,7 +144,7 @@ class StdImageFieldFile(ImageFieldFile):
         super(StdImageFieldFile, self).delete(save)
 
     def delete_variations(self):
-        for variation in self.field.variations:
+        for _, variation in self.field.variations.items():
             variation_name = self.get_variation_name(self.name, variation)
             self.storage.delete(variation_name)
 
@@ -247,7 +251,7 @@ class StdImageField(ImageField):
                 for name, variation in list(self.variations.items()):
                     variation_name = self.attr_class.get_variation_name(
                         field.name,
-                        variation['name']
+                        variation
                     )
                     variation_field = ImageFieldFile(instance,
                                                      self,

@@ -146,7 +146,7 @@ def custom_render_variations(file_name, variations, storage, replace=False):
     for _, variation in variations.items():
         variation_name = StdImageFieldFile.get_variation_name(
             file_name,
-            variation['name']
+            variation
         )
         if storage.exists(variation_name):
             storage.delete(variation_name)
