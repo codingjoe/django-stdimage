@@ -148,43 +148,31 @@ class TestModel(TestStdImage):
         assert not os.path.exists(path)
 
     def test_progressive_jpeg_from_jpeg(self):
-        source_file = os.path.join(FIXTURE_DIR, '600x400.jpg')
-        target_file = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        os.mkdir(IMG_DIR)
-        shutil.copyfile(source_file, target_file)
         ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.jpg']
         )
-        thumbnail_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        assert os.path.exists(thumbnail_path)
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
 
     def test_progressive_jpeg_from_png(self):
-        source_file = os.path.join(FIXTURE_DIR, '600x400.png')
-        target_file = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        os.mkdir(IMG_DIR)
-        shutil.copyfile(source_file, target_file)
         ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.png']
         )
-        thumbnail_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        assert os.path.exists(thumbnail_path)
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
 
-        thumbnail_path = os.path.join(IMG_DIR, 'image.progressive.png')
-        assert not os.path.exists(thumbnail_path)
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.png')
+        assert not os.path.exists(progressive_path)
 
     def test_progressive_jpeg_from_gif(self):
-        source_file = os.path.join(FIXTURE_DIR, '600x400.gif')
-        target_file = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        os.mkdir(IMG_DIR)
-        shutil.copyfile(source_file, target_file)
         ProgressiveJpegModel.objects.create(
             image=self.fixtures['600x400.gif']
         )
-        thumbnail_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
-        assert os.path.exists(thumbnail_path)
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
 
-        thumbnail_path = os.path.join(IMG_DIR, 'image.progressive.gif')
-        assert not os.path.exists(thumbnail_path)
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.gif')
+        assert not os.path.exists(progressive_path)
 
     def test_thumbnail_save_without_directory(self):
         obj = ThumbnailWithoutDirectoryModel.objects.create(

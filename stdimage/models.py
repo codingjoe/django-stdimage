@@ -126,7 +126,7 @@ class StdImageFieldFile(ImageFieldFile):
         """Return the variation file name based on the variation."""
         path, ext = os.path.splitext(file_name)
         if is_progressive_jpeg:
-            ext = "jpg"
+            ext = ".jpg"
         path, file_name = os.path.split(path)
         file_name = '{file_name}.{variation_name}{extension}'.format(**{
             'file_name': file_name,
