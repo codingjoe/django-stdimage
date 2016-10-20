@@ -176,7 +176,7 @@ class StdImageField(ImageField):
         'crop': False,
         'resample': Image.ANTIALIAS,
         'is_progressive_jpeg': False,
-        'progressive_jpeg_quality': 80
+        'progressive_jpeg_quality': 80,
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
