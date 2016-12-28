@@ -19,13 +19,14 @@ from django.core.files import File  # NoQA
 from django.test import TestCase  # NoQA
 from django.contrib.auth.models import User  # NoQA
 
+from stdimage.models import StdImageFieldFile  # NoQA
 from .models import (
     SimpleModel, ResizeModel, AdminDeleteModel,
     ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,
     UUIDModel,
     UtilVariationsModel,
     ThumbnailWithoutDirectoryModel,
-    CustomRenderVariationsModel)  # NoQA
+    CustomRenderVariationsModel, ProgressiveJpegModel)  # NoQA
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
 
@@ -140,12 +141,45 @@ class TestModel(TestStdImage):
         path = os.path.join(IMG_DIR, 'image.thumbnail.gif')
         assert not os.path.exists(path)
 
-    def test_fore_min_size(self):
+    def test_force_min_size(self):
         self.client.post('/admin/tests/forceminsizemodel/add/', {
             'image': self.fixtures['100.gif'],
         })
         path = os.path.join(IMG_DIR, 'image.gif')
         assert not os.path.exists(path)
+
+    def test_progressive_jpeg_from_jpeg(self):
+        instance = ProgressiveJpegModel.objects.create(
+            image=self.fixtures['600x400.jpg']
+        )
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
+
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
+
+    def test_progressive_jpeg_from_png(self):
+        instance = ProgressiveJpegModel.objects.create(
+            image=self.fixtures['600x400.png']
+        )
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
+
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.png')
+        assert not os.path.exists(progressive_path)
+
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
+
+    def test_progressive_jpeg_from_gif(self):
+        instance = ProgressiveJpegModel.objects.create(
+            image=self.fixtures['600x400.gif']
+        )
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.jpg')
+        assert os.path.exists(progressive_path)
+
+        progressive_path = os.path.join(IMG_DIR, 'image.progressive.gif')
+        assert not os.path.exists(progressive_path)
+
+        assert instance.image.progressive.url == 'img/image.progressive.jpg'
 
     def test_thumbnail_save_without_directory(self):
         obj = ThumbnailWithoutDirectoryModel.objects.create(
@@ -166,6 +200,23 @@ class TestModel(TestStdImage):
         # Image size must be 100x100 despite variations settings
         assert instance.image.thumbnail.width == 100
         assert instance.image.thumbnail.height == 100
+
+    def test_get_variation_name(self):
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name('foobar.png', 'test'),
+            'foobar.test.png')
+
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name('foobar.png',
+                                                 {'name': 'test'}),
+            'foobar.test.png')
+
+        self.assertEqual(
+            StdImageFieldFile.get_variation_name(
+                'foobar.png',
+                {'name': 'test', 'is_progressive_jpeg': True}
+            ),
+            'foobar.test.jpg')
 
 
 class TestUtils(TestStdImage):

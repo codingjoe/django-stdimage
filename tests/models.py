@@ -146,7 +146,7 @@ def custom_render_variations(file_name, variations, storage, replace=False):
     for _, variation in variations.items():
         variation_name = StdImageFieldFile.get_variation_name(
             file_name,
-            variation['name']
+            variation
         )
         if storage.exists(variation_name):
             storage.delete(variation_name)
@@ -171,6 +171,15 @@ class CustomRenderVariationsModel(models.Model):
         upload_to=UploadTo(name='image', path='img'),
         variations={'thumbnail': (150, 150)},
         render_variations=custom_render_variations,
+    )
+
+
+class ProgressiveJpegModel(models.Model):
+    """Render progressive jpeg variation."""
+    image = StdImageField(
+        upload_to=UploadTo(name='image', path='img'),
+        variations={'progressive': {'width': 300, 'height': 200,
+                                    'is_progressive_jpeg': True}}
     )
 
 
