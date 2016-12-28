@@ -1,28 +1,32 @@
 language: python
 sudo: false
+dist: trusty
 cache: pip
 python:
   - "2.7"
-  - "3.4"
   - "3.5"
+  - "3.6"
 env:
   matrix:
-    - DJANGO="Django<1.9,>=1.8"
-    - DJANGO="Django<1.10,>=1.9"
-    - DJANGO="-e git+https://github.com/django/django.git@master#egg=Django"
+    - TOXENV=qa
+    - DJANGO=18
+    - DJANGO=19
+    - DJANGO=110
+    - DJANGO=master
 matrix:
   fast_finish: true
   allow_failures:
-    - env: DJANGO="-e git+https://github.com/django/django.git@master#egg=Django"
+    - env: DJANGO=master
 install:
-  - pip install --upgrade pip
-  - pip install -r requirements-dev.txt
-  - pip install $DJANGO
-  - pip install --upgrade coveralls
+  - pip install --upgrade pip tox
+  - pip install -U coveralls
+before_script:
+  - |
+    if [[ -z $TOXENV ]]; then
+      export TOXENV=py$(echo $TRAVIS_PYTHON_VERSION | sed -e 's/\.//g')-dj$DJANGO
+    fi
+  - echo $TOXENV
 script:
-  - isort --check-only --recursive --diff .
-  - flake8 --jobs=2 .
-  - pep257 --verbose --explain --source --count stdimage
-  - coverage run --source=stdimage -m 'pytest'
+  - tox -e $TOXENV
 after_success:
   - coveralls
