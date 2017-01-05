@@ -74,6 +74,7 @@ class StdImageFieldFile(ImageFieldFile):
 
         with storage.open(file_name) as f:
             with Image.open(f) as img:
+                save_kargs = {}
                 file_format = img.format
 
                 if cls.is_smaller(img, variation):
@@ -93,6 +94,15 @@ class StdImageFieldFile(ImageFieldFile):
                     size = variation['width'], variation['height']
                     size = tuple(int(i) if i != float('inf') else i
                                  for i in size)
+
+                    if file_format == 'JPEG':
+                        # http://stackoverflow.com/a/21669827
+                        img = img.convert('RGB')
+                        save_kargs['optimize'] = True
+                        save_kargs['quality'] = 'web_high'
+                        if size[0] * size[1] > 10000:  # roughly <10kb
+                            save_kargs['progressive'] = True
+
                     if variation['crop']:
                         img = ImageOps.fit(
                             img,
@@ -106,7 +116,7 @@ class StdImageFieldFile(ImageFieldFile):
                         )
 
                 with BytesIO() as file_buffer:
-                    img.save(file_buffer, file_format)
+                    img.save(file_buffer, file_format, **save_kargs)
                     f = ContentFile(file_buffer.getvalue())
                     storage.save(variation_name, f)
         return variation_name
