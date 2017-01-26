@@ -23,11 +23,11 @@ BAR = None
 
 class MemoryUsageWidget(progressbar.widgets.WidgetBase):
     def __call__(self, progress, data):
-        if not resource:
-            return 'RAM: N/A'
-        return 'RAM: {0:10.1f} MB'.format(
-            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        )
+        if resource is not None:
+            return 'RAM: {0:10.1f} MB'.format(
+                resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+            )
+        return 'RAM: N/A'
 
 
 class Command(BaseCommand):
