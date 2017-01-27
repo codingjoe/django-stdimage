@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-import resource
 import sys
 import traceback
 from multiprocessing import Pool, cpu_count
@@ -13,14 +12,22 @@ from django.core.management import BaseCommand, CommandError
 
 from stdimage.utils import render_variations
 
+try:
+    import resource
+except ImportError:
+    resource = None
+
+
 BAR = None
 
 
 class MemoryUsageWidget(progressbar.widgets.WidgetBase):
     def __call__(self, progress, data):
-        return 'RAM: {0:10.1f} MB'.format(
-            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        )
+        if resource is not None:
+            return 'RAM: {0:10.1f} MB'.format(
+                resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+            )
+        return 'RAM: N/A'
 
 
 class Command(BaseCommand):
