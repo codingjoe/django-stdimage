@@ -134,7 +134,7 @@ Clearing the field if blank is true, does not delete the file. This can also be 
 This packages contains two signal callback methods that handle file deletion for all SdtImageFields of a model.
 
 ```python
-from stdimage import pre_delete_delete_callback, pre_save_delete_callback
+from stdimage.utils import pre_delete_delete_callback, pre_save_delete_callback
 
 
 post_delete.connect(pre_delete_delete_callback, sender=MyModel)
