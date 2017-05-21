@@ -6,10 +6,12 @@ import uuid
 
 from django.core.files.storage import default_storage
 from django.utils.text import slugify
+from django.utils.deconstruct import deconstructible
 
 from .models import StdImageField, StdImageFieldFile
 
 
+@deconstructible
 class UploadTo(object):
     file_pattern = "%(name)s%(ext)s"
     path_pattern = "%(path)s"
@@ -36,6 +38,7 @@ class UploadTo(object):
         return path, self.args, self.kwargs
 
 
+@deconstructible
 class UploadToUUID(UploadTo):
 
     def __call__(self, instance, filename):
@@ -45,14 +48,17 @@ class UploadToUUID(UploadTo):
         return super(UploadToUUID, self).__call__(instance, filename)
 
 
+@deconstructible
 class UploadToClassNameDir(UploadTo):
     path_pattern = '%(class_name)s'
 
 
+@deconstructible
 class UploadToClassNameDirUUID(UploadToClassNameDir, UploadToUUID):
     pass
 
 
+@deconstructible
 class UploadToAutoSlug(UploadTo):
 
     def __init__(self, populate_from, **kwargs):
@@ -67,6 +73,7 @@ class UploadToAutoSlug(UploadTo):
         return super(UploadToAutoSlug, self).__call__(instance, filename)
 
 
+@deconstructible
 class UploadToAutoSlugClassNameDir(UploadToClassNameDir, UploadToAutoSlug):
     pass
 
