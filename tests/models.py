@@ -8,9 +8,10 @@ from PIL import Image
 
 from stdimage import StdImageField
 from stdimage.models import StdImageFieldFile
-from stdimage.utils import (UploadTo, UploadToAutoSlugClassNameDir,
-                            UploadToUUID, pre_delete_delete_callback,
-                            pre_save_delete_callback, render_variations)
+from stdimage.utils import (
+    UploadTo, UploadToAutoSlugClassNameDir, UploadToUUID,
+    pre_delete_delete_callback, pre_save_delete_callback, render_variations
+)
 from stdimage.validators import MaxSizeValidator, MinSizeValidator
 
 
