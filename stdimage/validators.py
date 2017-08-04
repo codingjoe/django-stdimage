@@ -22,7 +22,7 @@ class BaseSizeValidator(BaseValidator):
         cleaned = self.clean(value)
         if self.compare(cleaned, self.limit_value):
             params = {
-                'with': self.limit_value[0],
+                'width': self.limit_value[0],
                 'height': self.limit_value[1],
             }
             raise ValidationError(self.message, code=self.code, params=params)
@@ -37,7 +37,7 @@ class BaseSizeValidator(BaseValidator):
 
 class MaxSizeValidator(BaseSizeValidator):
     """
-    ImageField validator to validate the max with and height of an image.
+    ImageField validator to validate the max width and height of an image.
 
     You may use float("inf") as an infinite boundary.
     """
@@ -46,13 +46,13 @@ class MaxSizeValidator(BaseSizeValidator):
         return img_size[0] > max_size[0] or img_size[1] > max_size[1]
     message = _('The image you uploaded is too large.'
                 ' The required maximum resolution is:'
-                ' %(with)sx%(height)s px.')
+                ' %(width)sx%(height)s px.')
     code = 'max_resolution'
 
 
 class MinSizeValidator(BaseSizeValidator):
     """
-    ImageField validator to validate the min with and height of an image.
+    ImageField validator to validate the min width and height of an image.
 
     You may use float("inf") as an infinite boundary.
     """
@@ -61,4 +61,4 @@ class MinSizeValidator(BaseSizeValidator):
         return img_size[0] < min_size[0] or img_size[1] < min_size[1]
     message = _('The image you uploaded is too small.'
                 ' The required minimum resolution is:'
-                ' %(with)sx%(height)s px.')
+                ' %(width)sx%(height)s px.')
