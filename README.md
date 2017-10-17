@@ -113,7 +113,7 @@ Validators can be used for both Forms and Models.
 
  Example
 ```python
-from stdimage.validators import UploadToUUID, UploadToClassNameDir, UploadToAutoSlug, UploadToAutoSlugClassNameDir
+from stdimage.validators import MinSizeValidator, MaxSizeValidator
 
 
 class MyClass(models.Model)
