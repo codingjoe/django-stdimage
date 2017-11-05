@@ -1,5 +1,5 @@
 -e .
-coverage==4.4.1
+coverage==4.4.2
 isort==4.2.15
 py==1.4.34
 pytest==3.2.3
