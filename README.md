@@ -1,10 +1,9 @@
 [![Django-CC](https://img.shields.io/badge/Django-CC-ee66dd.svg)](https://github.com/codingjoe/django-cc)
 [![version](https://img.shields.io/pypi/v/django-stdimage.svg)](https://pypi.python.org/pypi/django-stdimage/)
 [![ci](https://api.travis-ci.org/codingjoe/django-stdimage.svg?branch=master)](https://travis-ci.org/codingjoe/django-stdimage)
-[![coverage](https://coveralls.io/repos/codingjoe/django-stdimage/badge.svg?branch=master)](https://coveralls.io/r/codingjoe/django-stdimage)
+[![codecov](https://codecov.io/gh/codingjoe/django-stdimage/branch/master/graph/badge.svg)](https://codecov.io/gh/codingjoe/django-stdimage)
 [![code-health](https://landscape.io/github/codingjoe/django-stdimage/master/landscape.svg?style=flat)](https://landscape.io/github/codingjoe/django-stdimage/master)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/codingjoe/django-stdimage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Django Standardized Image Field
 
