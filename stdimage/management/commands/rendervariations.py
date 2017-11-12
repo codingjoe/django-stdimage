@@ -1,6 +1,5 @@
-import sys
-import traceback
-from multiprocessing import Pool, cpu_count
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import cpu_count
 
 import progressbar
 from django.apps import apps
@@ -8,23 +7,6 @@ from django.core.files.storage import get_storage_class
 from django.core.management import BaseCommand, CommandError
 
 from stdimage.utils import render_variations
-
-try:
-    import resource
-except ImportError:
-    resource = None
-
-
-BAR = None
-
-
-class MemoryUsageWidget(progressbar.widgets.WidgetBase):
-    def __call__(self, progress, data):
-        if resource is None:
-            return 'RAM: N/A'
-        return 'RAM: {0:10.1f} MB'.format(
-            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        )
 
 
 class Command(BaseCommand):
@@ -73,11 +55,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def render(field, images, count, replace, do_render):
-        pool = Pool(
-            initializer=init_progressbar,
-            initargs=[count]
-        )
-        args = [
+        kwargs_list = (
             dict(
                 file_name=file_name,
                 do_render=do_render,
@@ -86,39 +64,23 @@ class Command(BaseCommand):
                 storage=field.storage.deconstruct()[0],
             )
             for file_name in images
-        ]
-        pool.map(render_field_variations, args)
-        pool.apply(finish_progressbar)
-        pool.close()
-        pool.join()
-
-
-def init_progressbar(count):
-    global BAR
-    BAR = progressbar.ProgressBar(maxval=count, widgets=(
-        progressbar.RotatingMarker(),
-        ' | ', MemoryUsageWidget(),
-        ' | CPUs: {}'.format(cpu_count()),
-        ' | ', progressbar.AdaptiveETA(),
-        ' | ', progressbar.Percentage(),
-        ' ', progressbar.Bar(),
-    ))
-
-
-def finish_progressbar():
-    BAR.finish()
+        )
+        with progressbar.ProgressBar(maxval=count, widgets=(
+            progressbar.RotatingMarker(),
+            ' | CPUs: {}'.format(cpu_count()),
+            ' | ', progressbar.AdaptiveETA(),
+            ' | ', progressbar.Percentage(),
+            ' ', progressbar.Bar(),
+        )) as bar:
+            with ProcessPoolExecutor() as executor:
+                while next(executor.map(render_field_variations, kwargs_list)):
+                    bar += 1
 
 
 def render_field_variations(kwargs):
-    try:
-        kwargs['storage'] = get_storage_class(kwargs['storage'])()
-        do_render = kwargs.pop('do_render')
-        if callable(do_render):
-            do_render = do_render(**kwargs)
-        if do_render:
-            render_variations(**kwargs)
-
-        global BAR
-        BAR += 1
-    except Exception:
-        raise Exception("".join(traceback.format_exception(*sys.exc_info())))
+    kwargs['storage'] = get_storage_class(kwargs['storage'])()
+    do_render = kwargs.pop('do_render')
+    if callable(do_render):
+        do_render = do_render(**kwargs)
+    if do_render:
+        render_variations(**kwargs)
