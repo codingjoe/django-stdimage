@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import os
 import uuid
 
@@ -10,7 +7,7 @@ from django.utils.text import slugify
 from .models import StdImageField, StdImageFieldFile
 
 
-class UploadTo(object):
+class UploadTo:
     file_pattern = "%(name)s%(ext)s"
     path_pattern = "%(path)s"
 
@@ -42,7 +39,7 @@ class UploadToUUID(UploadTo):
         self.kwargs.update({
             'name': uuid.uuid4().hex,
         })
-        return super(UploadToUUID, self).__call__(instance, filename)
+        return super().__call__(instance, filename)
 
 
 class UploadToClassNameDir(UploadTo):
@@ -57,14 +54,14 @@ class UploadToAutoSlug(UploadTo):
 
     def __init__(self, populate_from, **kwargs):
         self.populate_from = populate_from
-        super(UploadToAutoSlug, self).__init__(populate_from, **kwargs)
+        super().__init__(populate_from, **kwargs)
 
     def __call__(self, instance, filename):
         field_value = getattr(instance, self.populate_from)
         self.kwargs.update({
             'name': slugify(field_value),
         })
-        return super(UploadToAutoSlug, self).__call__(instance, filename)
+        return super().__call__(instance, filename)
 
 
 class UploadToAutoSlugClassNameDir(UploadToClassNameDir, UploadToAutoSlug):

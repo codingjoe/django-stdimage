@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import os
 from io import BytesIO
@@ -30,7 +27,7 @@ class StdImageFieldFile(ImageFieldFile):
     """Like ImageFieldFile but handles variations."""
 
     def save(self, name, content, save=True):
-        super(StdImageFieldFile, self).save(name, content, save)
+        super().save(name, content, save)
         render_variations = self.field.render_variations
         if callable(render_variations):
             render_variations = render_variations(
@@ -135,7 +132,7 @@ class StdImageFieldFile(ImageFieldFile):
 
     def delete(self, save=True):
         self.delete_variations()
-        super(StdImageFieldFile, self).delete(save)
+        super().delete(save)
 
     def delete_variations(self):
         for variation in self.field.variations:
@@ -214,8 +211,7 @@ class StdImageField(ImageField):
                     key=lambda x: x["height"])["height"]
             )
 
-        super(StdImageField, self).__init__(verbose_name, name,
-                                            *args, **kwargs)
+        super().__init__(verbose_name, name, *args, **kwargs)
 
     def add_variation(self, name, params):
         variation = self.def_variation.copy()
@@ -250,10 +246,10 @@ class StdImageField(ImageField):
 
     def contribute_to_class(self, cls, name):
         """Generate all operations on specified signals."""
-        super(StdImageField, self).contribute_to_class(cls, name)
+        super().contribute_to_class(cls, name)
         signals.post_init.connect(self.set_variations, sender=cls)
 
     def validate(self, value, model_instance):
-        super(StdImageField, self).validate(value, model_instance)
+        super().validate(value, model_instance)
         if self.force_min_size:
             MinSizeValidator(self.min_size[0], self.min_size[1])(value)
