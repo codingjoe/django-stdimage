@@ -12,7 +12,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 
-class UUID4Monkey(object):
+class UUID4Monkey:
     hex = '653d1c6863404b9689b75fa930c9d0a0'
 
 
@@ -38,7 +38,7 @@ FIXTURES = [
 ]
 
 
-class TestStdImage(object):
+class TestStdImage:
     fixtures = {}
 
     @pytest.fixture(autouse=True)

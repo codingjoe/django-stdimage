@@ -25,11 +25,8 @@ class Command(BaseCommand):
                             help='Replace existing files.')
 
     def handle(self, *args, **options):
-        replace = options.get('replace')
-        if len(options['field_path']):
-            routes = options['field_path']
-        else:
-            routes = [options['field_path']]
+        replace = options.get('replace', False)
+        routes = options.get('field_path', [])
         for route in routes:
             try:
                 app_label, model_name, field_name = route.rsplit('.')
@@ -73,7 +70,7 @@ class Command(BaseCommand):
             ' ', progressbar.Bar(),
         )) as bar:
             with ProcessPoolExecutor() as executor:
-                while next(executor.map(render_field_variations, kwargs_list)):
+                for _ in executor.map(render_field_variations, kwargs_list):
                     bar += 1
 
 

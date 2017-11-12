@@ -1,6 +1,7 @@
 import hashlib
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from django.core.management import CommandError, call_command
@@ -11,7 +12,16 @@ from tests.models import (
 
 
 @pytest.mark.django_db
-class TestRenderVariations(object):
+class TestRenderVariations:
+
+    @pytest.fixture(autouse=True)
+    def _swap_concurrent_executor(self, monkeypatch):
+        """Use ThreadPoolExecutor for coverage reports."""
+        monkeypatch.setattr(
+            'concurrent.futures.ProcessPoolExecutor',
+            ThreadPoolExecutor,
+        )
+
     def test_no_options(self, image_upload_file):
         obj = ThumbnailModel.objects.create(
             image=image_upload_file

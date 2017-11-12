@@ -9,7 +9,7 @@ from tests.test_models import IMG_DIR
 
 
 @pytest.mark.django_db
-class TestRenderVariations(object):
+class TestRenderVariations:
     def test_render_variations(self, image_upload_file):
         instance = ManualVariationsModel.customer_manager.create(
             image=image_upload_file
@@ -31,7 +31,7 @@ class TestRenderVariations(object):
         assert os.path.exists(path)
 
 
-class TestUploadTo(object):
+class TestUploadTo:
     def test_file_name(self):
         file_name = UploadTo()(object(), '/path/to/file.jpeg')
         assert file_name == '/path/to/file.jpeg'
