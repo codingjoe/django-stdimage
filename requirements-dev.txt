@@ -1,7 +1,6 @@
 -e .
-coverage==4.4.2
-isort==4.2.15
-py==1.4.34
-pytest==3.2.3
-pytest-django==3.1.2
-tox==2.9.1
+coverage
+isort
+pytest
+pytest-django
+tox
