@@ -8,7 +8,7 @@ from django.db.models import signals
 from django.db.models.fields.files import (
     ImageField, ImageFieldFile, ImageFileDescriptor
 )
-from PIL import Image, ImageOps
+from PIL import Image, ImageFile, ImageOps
 
 from .validators import MinSizeValidator
 
@@ -69,6 +69,7 @@ class StdImageFieldFile(ImageFieldFile):
 
         resample = variation['resample']
 
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
             with Image.open(f) as img:
                 save_kargs = {}
