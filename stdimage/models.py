@@ -71,7 +71,7 @@ class StdImageFieldFile(ImageFieldFile):
         quality = 80
         if variation['quality']:
             quality = variation['quality']
-            
+
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
@@ -166,7 +166,8 @@ class StdImageField(ImageField):
         'width': float('inf'),
         'height': float('inf'),
         'crop': False,
-        'resample': Image.ANTIALIAS
+        'resample': Image.ANTIALIAS,
+        'quality': 80
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
