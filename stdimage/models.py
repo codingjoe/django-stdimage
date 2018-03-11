@@ -68,10 +68,10 @@ class StdImageFieldFile(ImageFieldFile):
                 return variation_name
 
         resample = variation['resample']
+        quality = 80
         if variation['quality']:
             quality = variation['quality']
-        else:
-            quality = 80
+            
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
