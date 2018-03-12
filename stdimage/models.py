@@ -68,9 +68,7 @@ class StdImageFieldFile(ImageFieldFile):
                 return variation_name
 
         resample = variation['resample']
-        quality = 80
-        if variation['quality']:
-            quality = variation['quality']
+        quality = variation['quality']
 
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
