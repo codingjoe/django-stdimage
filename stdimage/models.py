@@ -72,8 +72,8 @@ class StdImageFieldFile(ImageFieldFile):
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
             with Image.open(f) as img:
-                save_kargs = {}
                 file_format = img.format
+                save_kargs = {}
 
                 if cls.is_smaller(img, variation):
                     factor = 1
@@ -97,9 +97,12 @@ class StdImageFieldFile(ImageFieldFile):
                         # http://stackoverflow.com/a/21669827
                         img = img.convert('RGB')
                         save_kargs['optimize'] = True
-                        save_kargs['quality'] = 'web_high'
-                        if size[0] * size[1] > 10000:  # roughly <10kb
+                        save_kargs['quality'] = variation['jpg_quality']
+                        if size[0] * size[1] > 5000:  # roughly > 5kb
                             save_kargs['progressive'] = True
+
+                    if file_format == 'PNG':
+                        save_kargs['optimize'] = True
 
                     if variation['crop']:
                         img = ImageOps.fit(
@@ -166,7 +169,8 @@ class StdImageField(ImageField):
         'width': float('inf'),
         'height': float('inf'),
         'crop': False,
-        'resample': Image.ANTIALIAS
+        'resample': Image.ANTIALIAS,
+        'jpg_quality': 80
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
