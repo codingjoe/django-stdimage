@@ -68,13 +68,12 @@ class StdImageFieldFile(ImageFieldFile):
                 return variation_name
 
         resample = variation['resample']
-        quality = variation['quality']
-
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
             with Image.open(f) as img:
                 file_format = img.format
+                options = {'optimize':True, 'progressive':True}
 
                 if cls.is_smaller(img, variation):
                     factor = 1
@@ -97,6 +96,8 @@ class StdImageFieldFile(ImageFieldFile):
                     if file_format == 'JPEG':
                         # http://stackoverflow.com/a/21669827
                         img = img.convert('RGB')
+                        options = {'quality':variation['jpg_quality'], 'optimize':True, 'progressive':True}
+
 
                     if variation['crop']:
                         img = ImageOps.fit(
@@ -111,8 +112,7 @@ class StdImageFieldFile(ImageFieldFile):
                         )
 
                 with BytesIO() as file_buffer:
-                    #img.save(file_buffer, file_format, **save_kargs)
-                    img.save(file_buffer, file_format, quality=quality, optimize=True, progressive=True)
+                    img.save(file_buffer, file_format, **options)
                     f = ContentFile(file_buffer.getvalue())
                     storage.save(variation_name, f)
         return variation_name
@@ -165,7 +165,7 @@ class StdImageField(ImageField):
         'height': float('inf'),
         'crop': False,
         'resample': Image.ANTIALIAS,
-        'quality': 80
+        'jpg_quality': 80
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
