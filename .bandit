@@ -1,0 +1,2 @@
+[bandit]
+excludes = tests
