@@ -1,2 +1,2 @@
 [bandit]
-excludes = tests
+exclude = tests
