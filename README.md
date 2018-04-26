@@ -34,7 +34,7 @@ and add `'stdimage'` to `INSTALLED_APP`s in your settings.py, that's it!
 except that you can specify different sized variations.
 
 ### Variations
-Variations are specified withing a dictionary. The key will will be the attribute referencing the resized image.
+Variations are specified within a dictionary. The key will be the attribute referencing the resized image.
 A variation can be defined both as a tuple or a dictionary.
 
 Example:
