@@ -256,7 +256,7 @@ class StdImageField(ImageField):
     def contribute_to_class(self, cls, name):
         """Generate all operations on specified signals."""
         super().contribute_to_class(cls, name)
-        signals.post_init.connect(self.set_variations, sender=cls)
+        signals.post_init.connect(self.set_variations, sender=self)
 
     def validate(self, value, model_instance):
         super().validate(value, model_instance)
