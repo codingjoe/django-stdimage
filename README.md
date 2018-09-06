@@ -39,6 +39,7 @@ A variation can be defined both as a tuple or a dictionary.
 
 Example:
 ```python
+from django.db import models
 from stdimage.models import StdImageField
 
 
@@ -59,7 +60,7 @@ class MyModel(models.Model):
     })
 
     ## Full ammo here. Please note all the definitions below are equal
-    image = StdImageField(upload_to=upload_to, blank=True, variations={
+    image = StdImageField(upload_to='path/to/img', blank=True, variations={
         'large': (600, 400),
         'thumbnail': (100, 100, True),
         'medium': (300, 200),
@@ -74,36 +75,11 @@ Example:
 ```
 
 ### Utils
-By default StdImageField stores images without modifying the file name.
-If you want to use more consistent file names you can use the build in upload callables.
 
-Example:
-```python
-from stdimage.utils import UploadToUUID, UploadToClassNameDir, UploadToAutoSlug, \
-    UploadToAutoSlugClassNameDir
+Since version 4 the custom `upload_to` utils have been dropped in favor of
+[Django Dynamic Filenames][dynamic_filenames].
 
-
-class MyClass(models.Model):
-    title = models.CharField(max_length=50)
-
-    # Gets saved to MEDIA_ROOT/myclass/#FILENAME#.#EXT#
-    image1 = StdImageField(upload_to=UploadToClassNameDir())
-
-    # Gets saved to MEDIA_ROOT/myclass/pic.#EXT#
-    image2 = StdImageField(upload_to=UploadToClassNameDir(name='pic'))
-
-    # Gets saved to MEDIA_ROOT/images/#UUID#.#EXT#
-    image3 = StdImageField(upload_to=UploadToUUID(path='images'))
-
-    # Gets saved to MEDIA_ROOT/myclass/#UUID#.#EXT#
-    image4 = StdImageField(upload_to=UploadToClassNameDirUUID())
-
-    # Gets save to MEDIA_ROOT/images/#SLUG#.#EXT#
-    image5 = StdImageField(upload_to=UploadToAutoSlug(populate_from='title'))
-
-    # Gets save to MEDIA_ROOT/myclass/#SLUG#.#EXT#
-    image6 = StdImageField(upload_to=UploadToAutoSlugClassNameDir(populate_from='title'))
-```
+[dynamic_filenames]: https://github.com/codingjoe/django-dynamic-filenames
 
 ### Validators
 The `StdImageField` doesn't implement any size validation. Validation can be specified using the validator attribute
@@ -112,10 +88,12 @@ Validators can be used for both Forms and Models.
 
  Example
 ```python
+from django.db import models
 from stdimage.validators import MinSizeValidator, MaxSizeValidator
+from stdimage.models import StdImageField
 
 
-class MyClass(models.Model)
+class MyClass(models.Model):
     image1 = StdImageField(validators=[MinSizeValidator(800, 600)])
     image2 = StdImageField(validators=[MaxSizeValidator(1028, 768)])
 ```
@@ -133,11 +111,14 @@ Clearing the field if blank is true, does not delete the file. This can also be 
 This packages contains two signal callback methods that handle file deletion for all SdtImageFields of a model.
 
 ```python
+from django.db.models.signals import pre_delete, pre_save
 from stdimage.utils import pre_delete_delete_callback, pre_save_delete_callback
 
+from . import models
 
-post_delete.connect(pre_delete_delete_callback, sender=MyModel)
-pre_save.connect(pre_save_delete_callback, sender=MyModel)
+
+pre_delete.connect(pre_delete_delete_callback, sender=models.MyModel)
+pre_save.connect(pre_save_delete_callback, sender=models.MyModel)
 ```
 
 **Warning:** You should not use the signal callbacks in production. They may result in data loss.
@@ -156,7 +137,7 @@ try:
     from django.apps import apps
     get_model = apps.get_model
 except ImportError:
-    from django.db.models.loading import get_model
+    from django.apps import apps
 
 from celery import shared_task
 
@@ -166,7 +147,7 @@ from stdimage.utils import render_variations
 @shared_task
 def process_photo_image(file_name, variations, storage):
     render_variations(file_name, variations, replace=True, storage=storage)
-    obj = get_model('myapp', 'Photo').objects.get(image=file_name)
+    obj = apps.get_model('myapp', 'Photo').objects.get(image=file_name)
     obj.processed = True
     obj.save()
 ```
@@ -175,7 +156,6 @@ def process_photo_image(file_name, variations, storage):
 ```python
 from django.db import models
 from stdimage.models import StdImageField
-from stdimage.utils import UploadToClassNameDir
 
 from tasks import process_photo_image
 
@@ -183,10 +163,10 @@ def image_processor(file_name, variations, storage):
     process_photo_image.delay(file_name, variations, storage)
     return False  # prevent default rendering
 
-class AsyncImageModel(models.Model)
+class AsyncImageModel(models.Model):
     image = StdImageField(
         # above task definition can only handle one model object per image filename
-        upload_to=UploadToClassNameDir(),
+        upload_to='path/to/file/',
         render_variations=image_processor  # pass boolean or callable
     )
     processed = models.BooleanField(default=False)  # flag that could be used for view querysets

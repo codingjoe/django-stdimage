@@ -9,21 +9,22 @@ from PIL import Image
 from stdimage import StdImageField
 from stdimage.models import StdImageFieldFile
 from stdimage.utils import (
-    UploadTo, UploadToAutoSlugClassNameDir, UploadToUUID,
     pre_delete_delete_callback, pre_save_delete_callback, render_variations
 )
 from stdimage.validators import MaxSizeValidator, MinSizeValidator
 
+upload_to = 'img/'
+
 
 class SimpleModel(models.Model):
     """works as ImageField"""
-    image = StdImageField(upload_to='img/')
+    image = StdImageField(upload_to=upload_to)
 
 
 class AdminDeleteModel(models.Model):
     """can be deleted through admin"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         blank=True
     )
 
@@ -31,7 +32,7 @@ class AdminDeleteModel(models.Model):
 class ResizeModel(models.Model):
     """resizes image to maximum size to fit a 640x480 area"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={
             'medium': {'width': 400, 'height': 400},
             'thumbnail': (100, 75),
@@ -42,7 +43,7 @@ class ResizeModel(models.Model):
 class ResizeCropModel(models.Model):
     """resizes image to 640x480 cropping if necessary"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={'thumbnail': (150, 150, True)}
     )
 
@@ -50,7 +51,7 @@ class ResizeCropModel(models.Model):
 class ThumbnailModel(models.Model):
     """creates a thumbnail resized to maximum size to fit a 100x75 area"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         blank=True,
         variations={'thumbnail': (100, 75)}
     )
@@ -58,14 +59,14 @@ class ThumbnailModel(models.Model):
 
 class MaxSizeModel(models.Model):
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         validators=[MaxSizeValidator(16, 16)]
     )
 
 
 class MinSizeModel(models.Model):
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         validators=[MinSizeValidator(200, 200)]
     )
 
@@ -73,21 +74,10 @@ class MinSizeModel(models.Model):
 class ForceMinSizeModel(models.Model):
     """creates a thumbnail resized to maximum size to fit a 100x75 area"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         force_min_size=True,
         variations={'thumbnail': (600, 600)}
     )
-
-
-class AutoSlugClassNameDirModel(models.Model):
-    name = models.CharField(max_length=50)
-    image = StdImageField(
-        upload_to=UploadToAutoSlugClassNameDir(populate_from='name')
-    )
-
-
-class UUIDModel(models.Model):
-    image = StdImageField(upload_to=UploadToUUID(path='img'))
 
 
 class CustomManager(models.Manager):
@@ -105,7 +95,7 @@ class CustomManagerModel(models.Model):
 class ManualVariationsModel(CustomManagerModel):
     """delays creation of 150x150 thumbnails until it is called manually"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={'thumbnail': (150, 150, True)},
         render_variations=False
     )
@@ -114,7 +104,7 @@ class ManualVariationsModel(CustomManagerModel):
 class MyStorageModel(CustomManagerModel):
     """delays creation of 150x150 thumbnails until it is called manually"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={'thumbnail': (150, 150, True)},
         storage=FileSystemStorage(),
     )
@@ -128,7 +118,7 @@ def render_job(**kwargs):
 class UtilVariationsModel(models.Model):
     """delays creation of 150x150 thumbnails until it is called manually"""
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={'thumbnail': (150, 150, True)},
         render_variations=render_job
     )
@@ -169,7 +159,7 @@ class CustomRenderVariationsModel(models.Model):
     """Use custom render_variations."""
 
     image = StdImageField(
-        upload_to=UploadTo(name='image', path='img'),
+        upload_to=upload_to,
         variations={'thumbnail': (150, 150)},
         render_variations=custom_render_variations,
     )

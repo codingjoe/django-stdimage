@@ -18,6 +18,6 @@ def imagedata():
 @pytest.fixture
 def image_upload_file(imagedata):
     return SimpleUploadedFile(
-        'testfile.jpg',
+        'image.jpg',
         imagedata.getvalue()
     )

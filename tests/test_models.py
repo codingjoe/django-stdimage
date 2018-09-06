@@ -23,8 +23,7 @@ from django.conf import settings  # NoQA
 
 from .models import (
     SimpleModel, ResizeModel, AdminDeleteModel,
-    ThumbnailModel, ResizeCropModel, AutoSlugClassNameDirModel,
-    UUIDModel,
+    ThumbnailModel, ResizeCropModel,
     UtilVariationsModel,
     ThumbnailWithoutDirectoryModel,
     CustomRenderVariationsModel)  # NoQA
@@ -85,27 +84,27 @@ class TestModel(TestStdImage):
 
         source_file = self.fixtures['600x400.jpg']
 
-        assert os.path.exists(os.path.join(IMG_DIR, 'image.jpg'))
+        assert os.path.exists(os.path.join(IMG_DIR, '600x400.jpg'))
         assert instance.image.width == 600
         assert instance.image.height == 400
-        path = os.path.join(IMG_DIR, 'image.jpg')
+        path = os.path.join(IMG_DIR, '600x400.jpg')
 
         with open(path, 'rb') as f:
             source_file.seek(0)
             assert source_file.read() == f.read()
 
-        path = os.path.join(IMG_DIR, 'image.medium.jpg')
+        path = os.path.join(IMG_DIR, '600x400.medium.jpg')
         assert os.path.exists(path)
         assert instance.image.medium.width == 400
         assert instance.image.medium.height <= 400
-        with open(os.path.join(IMG_DIR, 'image.medium.jpg'), 'rb') as f:
+        with open(os.path.join(IMG_DIR, '600x400.medium.jpg'), 'rb') as f:
             source_file.seek(0)
             assert source_file.read() != f.read()
 
-        assert os.path.exists(os.path.join(IMG_DIR, 'image.thumbnail.jpg'))
+        assert os.path.exists(os.path.join(IMG_DIR, '600x400.thumbnail.jpg'))
         assert instance.image.thumbnail.width == 100
         assert instance.image.thumbnail.height <= 75
-        with open(os.path.join(IMG_DIR, 'image.thumbnail.jpg'), 'rb') as f:
+        with open(os.path.join(IMG_DIR, '600x400.thumbnail.jpg'), 'rb') as f:
             source_file.seek(0)
             assert source_file.read() != f.read()
 
@@ -207,31 +206,11 @@ class TestUtils(TestStdImage):
             })
         assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
 
-    def test_upload_to_auto_slug_class_name_dir(self, db):
-        AutoSlugClassNameDirModel.objects.create(
-            name='foo bar',
-            image=self.fixtures['100.gif']
-        )
-        file_path = os.path.join(
-            settings.MEDIA_ROOT,
-            'autoslugclassnamedirmodel',
-            'foo-bar.gif'
-        )
-        assert os.path.exists(file_path)
-
-    def test_upload_to_uuid(self, db):
-        UUIDModel.objects.create(image=self.fixtures['100.gif'])
-        file_path = os.path.join(
-            IMG_DIR,
-            '653d1c6863404b9689b75fa930c9d0a0.gif'
-        )
-        assert os.path.exists(file_path)
-
     def test_render_variations_callback(self, db):
         UtilVariationsModel.objects.create(image=self.fixtures['100.gif'])
         file_path = os.path.join(
             IMG_DIR,
-            'image.thumbnail.gif'
+            '100.thumbnail.gif'
         )
         assert os.path.exists(file_path)
 
@@ -241,10 +220,10 @@ class TestValidators(TestStdImage):
         admin_client.post('/admin/tests/maxsizemodel/add/', {
             'image': self.fixtures['600x400.jpg'],
         })
-        assert not os.path.exists(os.path.join(IMG_DIR, 'image.jpg'))
+        assert not os.path.exists(os.path.join(IMG_DIR, '800x600.jpg'))
 
     def test_min_size_validator(self, admin_client):
         admin_client.post('/admin/tests/minsizemodel/add/', {
             'image': self.fixtures['100.gif'],
         })
-        assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
+        assert not os.path.exists(os.path.join(IMG_DIR, '100.gif'))
