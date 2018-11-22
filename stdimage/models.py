@@ -240,7 +240,8 @@ class StdImageField(ImageField):
 
         :param instance: FileField
         """
-        if getattr(instance, self.name):
+        deferred_field = self.name in instance.get_deferred_fields()
+        if not deferred_field and getattr(instance, self.name):
             field = getattr(instance, self.name)
             if field._committed:
                 for name, variation in list(self.variations.items()):

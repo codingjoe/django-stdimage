@@ -167,6 +167,15 @@ class TestModel(TestStdImage):
         assert instance.image.thumbnail.width == 100
         assert instance.image.thumbnail.height == 100
 
+    def test_defer(self, db, django_assert_num_queries):
+        """Test that set_variations doesn't attempt to use field data
+        when the field is deferred, which would result
+        in another query being executed implicitly.
+        """
+        instance = SimpleModel.objects.create(image=self.fixtures['100.gif'])
+        with django_assert_num_queries(1):
+            SimpleModel.objects.only('pk').get(pk=instance.pk)
+
 
 class TestUtils(TestStdImage):
     """Tests Utils"""
