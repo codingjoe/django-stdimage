@@ -168,13 +168,18 @@ class TestModel(TestStdImage):
         assert instance.image.thumbnail.height == 100
 
     def test_defer(self, db, django_assert_num_queries):
-        """Test that set_variations doesn't attempt to use field data
-        when the field is deferred, which would result
-        in another query being executed implicitly.
         """
-        instance = SimpleModel.objects.create(image=self.fixtures['100.gif'])
+        `set_variations` does not access a deferred field.
+
+        Accessing a deferred field would cause Django to do
+        a second implicit database query.
+        """
+        instance = ResizeModel.objects.create(image=self.fixtures['100.gif'])
         with django_assert_num_queries(1):
-            SimpleModel.objects.only('pk').get(pk=instance.pk)
+            deferred = ResizeModel.objects.only('pk').get(pk=instance.pk)
+        with django_assert_num_queries(1):
+            deferred.image
+        assert instance.image.thumbnail == deferred.image.thumbnail
 
 
 class TestUtils(TestStdImage):
