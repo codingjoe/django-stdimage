@@ -7,19 +7,11 @@ charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 88
 
 [*.py]
 indent_style = space
 indent_size = 4
-# isort config
-atomic = true
-multi_line_output = 5
-line_length = 79
-combine_as_imports = true
-skip = wsgi.py,docs,.tox,env
-known_first_party = stdimage,tests
-known_third_party = django
-
 
 [*.{rst,ini}]
 indent_style = space
@@ -28,14 +20,6 @@ indent_size = 4
 [*.{yml,yaml,html,xml,xsl,json}]
 indent_style = space
 indent_size = 2
-
-[*.{css,less}]
-indent_style = space
-indent_size = 2
-
-[*.{js,coffee}]
-indent_style = space
-indent_size = 4
 
 [Makefile]
 indent_style = tab

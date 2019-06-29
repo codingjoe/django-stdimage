@@ -73,7 +73,7 @@ class Command(BaseCommand):
             )
             for file_name in images
         )
-        with progressbar.ProgressBar(maxval=count, widgets=(
+        with progressbar.ProgressBar(max_value=count, widgets=(
             progressbar.RotatingMarker(),
             ' | CPUs: {}'.format(cpu_count()),
             ' | ', progressbar.AdaptiveETA(),

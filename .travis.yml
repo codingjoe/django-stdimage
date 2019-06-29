@@ -1,12 +1,13 @@
 language: python
-sudo: false
+dist: xenial
 cache: pip
 python:
 - '3.6'
+- '3.7'
 env:
   matrix:
-  - TOXENV=qa
   - DJANGO=111
+  - DJANGO=22
   - DJANGO=master
 matrix:
   fast_finish: true
@@ -31,5 +32,5 @@ deploy:
     secure: dnmVaqnmG6mSrmI9q6nL2l0aGkX56+WAsqdT/J1O2hBpFBOE4NiqH+2ryIqZj1wrvHZ72/jjyT5Xi1MWYxwDtDfkBIp+juHUGPbFfGy3J7EVgGkmf38E5SC2Q9IHc3A1iHxTZAX3o816TP3bt5vwGll3UzSMiaaPRQ/AiK4+og4=
   on:
     tags: true
-  distributions: sdist bdist_wheel
+  distributions: django-stdimage sdist bdist_wheel
   repo: codingjoe/django-stdimage

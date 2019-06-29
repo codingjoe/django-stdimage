@@ -6,9 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 from django.core.management import CommandError, call_command
 
-from tests.models import (
-    CustomRenderVariationsModel, MyStorageModel, ThumbnailModel
-)
+from tests.models import CustomRenderVariationsModel, MyStorageModel, ThumbnailModel
 
 
 @pytest.mark.django_db

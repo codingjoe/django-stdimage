@@ -5,9 +5,8 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models import signals
-from django.db.models.fields.files import (
-    ImageField, ImageFieldFile, ImageFileDescriptor
-)
+from django.db.models.fields.files import (ImageField, ImageFieldFile,
+                                           ImageFileDescriptor,)
 from PIL import Image, ImageFile, ImageOps
 
 from .validators import MinSizeValidator

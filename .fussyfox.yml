@@ -1,0 +1,4 @@
+- bandit
+- flake8
+- isort
+- pydocstyle

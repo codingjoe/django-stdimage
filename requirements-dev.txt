@@ -1,6 +1,0 @@
--e .
-coverage
-isort
-pytest
-pytest-django
-tox

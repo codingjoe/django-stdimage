@@ -1,34 +1,18 @@
-# coding: utf-8
-from __future__ import absolute_import, unicode_literals
-
 import io
-
 import os
-import pytest
-import uuid
 
-from PIL import Image
+import pytest
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
-
-class UUID4Monkey:
-    hex = '653d1c6863404b9689b75fa930c9d0a0'
-
-
-uuid.__dict__['uuid4'] = lambda: UUID4Monkey()
-
-import django  # NoQA
-from django.conf import settings  # NoQA
-
-from .models import (
-    SimpleModel, ResizeModel, AdminDeleteModel,
-    ThumbnailModel, ResizeCropModel,
-    UtilVariationsModel,
-    ThumbnailWithoutDirectoryModel,
-    CustomRenderVariationsModel)  # NoQA
+from .models import (AdminDeleteModel, CustomRenderVariationsModel, ResizeCropModel,
+                     ResizeModel, SimpleModel, ThumbnailModel,
+                     ThumbnailWithoutDirectoryModel, UtilVariationsModel,)
 
 IMG_DIR = os.path.join(settings.MEDIA_ROOT, 'img')
+
 FIXTURES = [
     ('100.gif', 'GIF', 100, 100),
     ('600x400.gif', 'GIF', 600, 400),
@@ -196,28 +180,18 @@ class TestUtils(TestStdImage):
         AdminDeleteModel.objects.create(
             image=self.fixtures['100.gif']
         )
-        if django.VERSION >= (1, 9):
-            admin_client.post('/admin/tests/admindeletemodel/1/change/', {
-                'image-clear': 'checked',
-            })
-        else:
-            admin_client.post('/admin/tests/admindeletemodel/1/', {
-                'image-clear': 'checked',
-            })
+        admin_client.post('/admin/tests/admindeletemodel/1/change/', {
+            'image-clear': 'checked',
+        })
         assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
 
     def test_pre_save_delete_callback_new(self, admin_client):
         AdminDeleteModel.objects.create(
             image=self.fixtures['100.gif']
         )
-        if django.VERSION >= (1, 9):
-            admin_client.post('/admin/tests/admindeletemodel/1/change/', {
-                'image': self.fixtures['600x400.jpg'],
-            })
-        else:
-            admin_client.post('/admin/tests/admindeletemodel/1/', {
-                'image': self.fixtures['600x400.jpg'],
-            })
+        admin_client.post('/admin/tests/admindeletemodel/1/change/', {
+            'image': self.fixtures['600x400.jpg'],
+        })
         assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
 
     def test_render_variations_callback(self, db):

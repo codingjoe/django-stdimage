@@ -1,8 +1,6 @@
-[![Django-CC](https://img.shields.io/badge/Django-CC-ee66dd.svg)](https://github.com/codingjoe/django-cc)
 [![version](https://img.shields.io/pypi/v/django-stdimage.svg)](https://pypi.python.org/pypi/django-stdimage/)
 [![ci](https://api.travis-ci.org/codingjoe/django-stdimage.svg?branch=master)](https://travis-ci.org/codingjoe/django-stdimage)
 [![codecov](https://codecov.io/gh/codingjoe/django-stdimage/branch/master/graph/badge.svg)](https://codecov.io/gh/codingjoe/django-stdimage)
-[![code-health](https://landscape.io/github/codingjoe/django-stdimage/master/landscape.svg?style=flat)](https://landscape.io/github/codingjoe/django-stdimage/master)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 # Django Standardized Image Field
@@ -22,7 +20,11 @@ Django Field that implement the following features:
 
 Simply install the latest stable package using the command
 
-`pip install django-stdimage`
+```bash
+pip install django-stdimage
+# or
+pipenv install django-stdimage
+```
 
 and add `'stdimage'` to `INSTALLED_APP`s in your settings.py, that's it!
 
@@ -38,6 +40,7 @@ Variations are specified within a dictionary. The key will be the attribute refe
 A variation can be defined both as a tuple or a dictionary.
 
 Example:
+
 ```python
 from django.db import models
 from stdimage.models import StdImageField
@@ -70,6 +73,7 @@ class MyModel(models.Model):
  For using generated variations in templates use `myimagefield.variation_name`.
 
 Example:
+
 ```html
 <a href="{{ object.myimage.url }}"><img alt="" src="{{ object.myimage.thumbnail.url }}"/></a>
 ```
@@ -86,7 +90,8 @@ The `StdImageField` doesn't implement any size validation. Validation can be spe
 and using a set of validators shipped with this package.
 Validators can be used for both Forms and Models.
 
- Example
+Example
+
 ```python
 from django.db import models
 from stdimage.validators import MinSizeValidator, MaxSizeValidator
@@ -123,7 +128,6 @@ pre_save.connect(pre_save_delete_callback, sender=models.MyModel)
 
 **Warning:** You should not use the signal callbacks in production. They may result in data loss.
 
-
 ### Async image processing
 Tools like celery allow to execute time-consuming tasks outside of the request. If you don't want
 to wait for your variations to be rendered in request, StdImage provides your the option to pass a
@@ -133,11 +137,7 @@ This example is based on celery.
 
 `tasks.py`:
 ```python
-try:
-    from django.apps import apps
-    get_model = apps.get_model
-except ImportError:
-    from django.apps import apps
+from django.apps import apps
 
 from celery import shared_task
 
@@ -157,7 +157,7 @@ def process_photo_image(file_name, variations, storage):
 from django.db import models
 from stdimage.models import StdImageField
 
-from tasks import process_photo_image
+from .tasks import process_photo_image
 
 def image_processor(file_name, variations, storage):
     process_photo_image.delay(file_name, variations, storage)
@@ -191,7 +191,3 @@ and therefore the huge memory footprint from previous versions.
 
 **Note:** PyPy seems to have some problems regarding multiprocessing,
 for that matter all multiprocessing is disabled in PyPy.
-
-## [Contributing](CONTRIBUTING.md)
-
-## [License](LICENSE)
