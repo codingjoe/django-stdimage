@@ -58,15 +58,6 @@ class StdImageFieldFile(ImageFieldFile):
                          storage=default_storage):
         """Render an image variation and saves it to the storage."""
         variation_name = cls.get_variation_name(file_name, variation['name'])
-        if storage.exists(variation_name):
-            if replace:
-                storage.delete(variation_name)
-                logger.info('File "%s" already exists and has been replaced.',
-                            variation_name)
-            else:
-                logger.info('File "%s" already exists.', variation_name)
-                return variation_name
-
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:
             with Image.open(f) as img:
