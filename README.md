@@ -30,12 +30,15 @@ and add `'stdimage'` to `INSTALLED_APP`s in your settings.py, that's it!
 
 ## Usage
 
-
-``StdImageField`` works just like Django's own
+`StdImageField` works just like Django's own
 [ImageField](https://docs.djangoproject.com/en/dev/ref/models/fields/#imagefield)
 except that you can specify different sized variations.
 
+The `JPEGField` works similar to the `StdImageField` but all size variations are
+converted to JPEGs, no matter what type the original file is.
+
 ### Variations
+
 Variations are specified within a dictionary. The key will be the attribute referencing the resized image.
 A variation can be defined both as a tuple or a dictionary.
 
@@ -43,7 +46,7 @@ Example:
 
 ```python
 from django.db import models
-from stdimage.models import StdImageField
+from stdimage import StdImageField, JPEGField
 
 
 class MyModel(models.Model):
@@ -56,6 +59,12 @@ class MyModel(models.Model):
 
     # is the same as dictionary-style call
     image = StdImageField(upload_to='path/to/img', variations={'thumbnail': (100, 75)})
+    
+    # variations are converted to JPEGs
+    jpeg = JPEGField(
+        upload_to='path/to/img',
+        variations={'full': (float('inf'), float('inf')), 'thumbnail': (100, 75)},
+    )
 
     # creates a thumbnail resized to 100x100 croping if necessary
     image = StdImageField(upload_to='path/to/img', variations={
@@ -67,11 +76,10 @@ class MyModel(models.Model):
         'large': (600, 400),
         'thumbnail': (100, 100, True),
         'medium': (300, 200),
-        delete_orphans=True,
-    })
+    }, delete_orphans=True)
 ```
 
- For using generated variations in templates use `myimagefield.variation_name`.
+For using generated variations in templates use `myimagefield.variation_name`.
 
 Example:
 

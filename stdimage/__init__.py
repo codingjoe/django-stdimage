@@ -1,1 +1,1 @@
-from .models import StdImageField  # NOQA
+from .models import JPEGField, StdImageField  # NOQA

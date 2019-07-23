@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 
+from . import models
 from .models import (AdminDeleteModel, CustomRenderVariationsModel, ResizeCropModel,
                      ResizeModel, SimpleModel, ThumbnailModel,
                      ThumbnailWithoutDirectoryModel, UtilVariationsModel,)
@@ -222,3 +223,11 @@ class TestValidators(TestStdImage):
             'image': self.fixtures['100.gif'],
         })
         assert not os.path.exists(os.path.join(IMG_DIR, '100.gif'))
+
+
+class TestJPEGField(TestStdImage):
+    def test_convert(self, db):
+        obj = models.JPEGModel.objects.create(image=self.fixtures['100.gif'])
+        assert obj.image.thumbnail.path.endswith('img/100.thumbnail.jpeg')
+        assert obj.image.full.width == 100
+        assert obj.image.full.height == 100

@@ -18,7 +18,7 @@ class StdImageFileDescriptor(ImageFileDescriptor):
     """The variation property of the field is accessible in instance cases."""
 
     def __set__(self, instance, value):
-        super(StdImageFileDescriptor, self).__set__(instance, value)
+        super().__set__(instance, value)
         self.field.set_variations(instance)
 
 
@@ -170,7 +170,7 @@ class StdImageField(ImageField):
         'width': float('inf'),
         'height': float('inf'),
         'crop': False,
-        'resample': Image.ANTIALIAS
+        'resample': Image.ANTIALIAS,
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
@@ -236,8 +236,9 @@ class StdImageField(ImageField):
 
     def add_variation(self, name, params):
         variation = self.def_variation.copy()
+        variation["kwargs"] = {}
         if isinstance(params, (list, tuple)):
-            variation.update(dict(zip(("width", "height", "crop"), params)))
+            variation.update(dict(zip(("width", "height", "crop", "kwargs"), params)))
         else:
             variation.update(params)
         variation["name"] = name
@@ -287,3 +288,65 @@ class StdImageField(ImageField):
             if file and file._committed and file != data:
                 file.delete(save=False)
         super().save_form_data(instance, data)
+
+
+class JPEGFieldFile(StdImageFieldFile):
+
+    @classmethod
+    def get_variation_name(cls, file_name, variation_name):
+        path = super().get_variation_name(file_name, variation_name)
+        path, ext = os.path.splitext(path)
+        return '%s.jpeg' % path
+
+    @classmethod
+    def process_variation(cls, variation, image):
+        """Process variation before actual saving."""
+        save_kargs = {}
+        file_format = 'JPEG'
+        save_kargs['format'] = file_format
+
+        resample = variation['resample']
+
+        factor = 1
+        while image.size[0] / factor \
+                > 2 * variation['width'] \
+                and image.size[1] * 2 / factor \
+                > 2 * variation['height']:
+            factor *= 2
+        if factor > 1:
+            image.thumbnail(
+                (int(image.size[0] / factor),
+                 int(image.size[1] / factor)),
+                resample=resample
+            )
+
+        size = variation['width'], variation['height']
+        size = tuple(int(i) if i != float('inf') else i
+                     for i in size)
+
+        # http://stackoverflow.com/a/21669827
+        image = image.convert('RGB')
+        save_kargs['optimize'] = True
+        save_kargs['quality'] = 'web_high'
+        if size[0] * size[1] > 10000:  # roughly <10kb
+            save_kargs['progressive'] = True
+
+        if variation['crop']:
+            image = ImageOps.fit(
+                image,
+                size,
+                method=resample
+            )
+        else:
+            image.thumbnail(
+                size,
+                resample=resample
+            )
+
+        save_kargs.update(variation['kwargs'])
+
+        return image, save_kargs
+
+
+class JPEGField(StdImageField):
+    attr_class = JPEGFieldFile

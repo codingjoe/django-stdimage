@@ -5,7 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from PIL import Image
 
-from stdimage import StdImageField
+from stdimage import JPEGField, StdImageField
 from stdimage.models import StdImageFieldFile
 from stdimage.utils import render_variations
 from stdimage.validators import MaxSizeValidator, MinSizeValidator
@@ -55,6 +55,19 @@ class ThumbnailModel(models.Model):
         upload_to=upload_to,
         blank=True,
         variations={'thumbnail': (100, 75)},
+        delete_orphans=True,
+    )
+
+
+class JPEGModel(models.Model):
+    """creates a thumbnail resized to maximum size to fit a 100x75 area"""
+    image = JPEGField(
+        upload_to=upload_to,
+        blank=True,
+        variations={
+            'full': (float('inf'), float('inf')),
+            'thumbnail': (100, 75, True),
+         },
         delete_orphans=True,
     )
 
