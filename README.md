@@ -67,6 +67,7 @@ class MyModel(models.Model):
         'large': (600, 400),
         'thumbnail': (100, 100, True),
         'medium': (300, 200),
+        delete_orphans=True,
     })
 ```
 
@@ -108,25 +109,29 @@ As storage isn't expensive, you shouldn't restrict upload dimensions.
 If you seek prevent users form overflowing your memory you should restrict the HTTP upload body size.
 
 ### Deleting images
+
 Django [dropped support](https://docs.djangoproject.com/en/dev/releases/1.3/#deleting-a-model-doesn-t-delete-associated-files)
 for automated deletions in version 1.3.
-Implementing file deletion [should be done](http://stackoverflow.com/questions/5372934/how-do-i-get-django-admin-to-delete-files-when-i-remove-an-object-from-the-data)
-inside your own applications using the `post_delete` or `pre_delete` signal.
-Clearing the field if blank is true, does not delete the file. This can also be achieved using `pre_save` and `post_save` signals.
-This packages contains two signal callback methods that handle file deletion for all SdtImageFields of a model.
+
+Since version 5, this package supports a `delete_orphans` argument. It will delete
+orphaned files, should a file be delete or replaced via Django form or and object with
+a `StdImageField` be deleted. It will not be deleted if the field value is changed or
+reassigned programatically. In those rare cases, you will need to handle proper deletion
+yourself.
 
 ```python
-from django.db.models.signals import pre_delete, pre_save
-from stdimage.utils import pre_delete_delete_callback, pre_save_delete_callback
-
-from . import models
+from django.db import models
+from stdimage.models import StdImageField
 
 
-pre_delete.connect(pre_delete_delete_callback, sender=models.MyModel)
-pre_save.connect(pre_save_delete_callback, sender=models.MyModel)
+class MyModel(models.Model):
+    image = StdImageField(
+        upload_to='path/to/files',
+        variations={'thumbnail': (100, 75)},
+        delete_orphans=True,
+        blank=True,
+    )
 ```
-
-**Warning:** You should not use the signal callbacks in production. They may result in data loss.
 
 ### Async image processing
 Tools like celery allow to execute time-consuming tasks outside of the request. If you don't want

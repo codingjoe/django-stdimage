@@ -170,20 +170,30 @@ class TestUtils(TestStdImage):
     """Tests Utils"""
 
     def test_deletion_singnal_receiver(self, db):
-        obj = SimpleModel.objects.create(
+        obj = AdminDeleteModel.objects.create(
             image=self.fixtures['100.gif']
         )
+        path = obj.image.path
         obj.delete()
-        assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
+        assert not os.path.exists(path)
+
+    def test_deletion_singnal_receiver_many(self, db):
+        obj = AdminDeleteModel.objects.create(
+            image=self.fixtures['100.gif']
+        )
+        path = obj.image.path
+        AdminDeleteModel.objects.all().delete()
+        assert not os.path.exists(path)
 
     def test_pre_save_delete_callback_clear(self, admin_client):
-        AdminDeleteModel.objects.create(
+        obj = AdminDeleteModel.objects.create(
             image=self.fixtures['100.gif']
         )
+        path = obj.image.path
         admin_client.post('/admin/tests/admindeletemodel/1/change/', {
             'image-clear': 'checked',
         })
-        assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
+        assert not os.path.exists(path)
 
     def test_pre_save_delete_callback_new(self, admin_client):
         AdminDeleteModel.objects.create(
@@ -195,11 +205,8 @@ class TestUtils(TestStdImage):
         assert not os.path.exists(os.path.join(IMG_DIR, 'image.gif'))
 
     def test_render_variations_callback(self, db):
-        UtilVariationsModel.objects.create(image=self.fixtures['100.gif'])
-        file_path = os.path.join(
-            IMG_DIR,
-            '100.thumbnail.gif'
-        )
+        obj = UtilVariationsModel.objects.create(image=self.fixtures['100.gif'])
+        file_path = obj.image.thumbnail.path
         assert os.path.exists(file_path)
 
 

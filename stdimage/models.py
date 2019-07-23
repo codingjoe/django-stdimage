@@ -153,18 +153,15 @@ class StdImageField(ImageField):
     Django ImageField that is able to create different size variations.
 
     Extra features are:
-        - Django-Storages compatible (S3)
-        - Python 2, 3 and PyPy support
-        - Django 1.5 and later support
-        - Resize images to different sizes
-        - Access thumbnails on model level, no template tags required
-        - Preserves original image
-        - Asynchronous rendering (Celery & Co)
-        - Multi threading and processing for optimum performance
-        - Restrict accepted image dimensions
-        - Rename files to a standardized name (using a callable upload_to)
 
-    :param variations: size variations of the image
+    -   Django-Storages compatible (S3)
+    -   Access thumbnails on model level, no template tags required
+    -   Preserves original image
+    -   Asynchronous rendering (Celery & Co)
+    -   Multi threading and processing for optimum performance
+    -   Restrict accepted image dimensions
+    -   Rename files to a standardized name (using a callable upload_to)
+
     """
 
     descriptor_class = StdImageFileDescriptor
@@ -177,19 +174,34 @@ class StdImageField(ImageField):
     }
 
     def __init__(self, verbose_name=None, name=None, variations=None,
-                 render_variations=True, force_min_size=False,
-                 *args, **kwargs):
+                 render_variations=True, force_min_size=False, delete_orphans=False,
+                 **kwargs):
         """
         Standardized ImageField for Django.
 
-        Usage: StdImageField(upload_to='PATH',
-         variations={'thumbnail': {"width", "height", "crop", "resample"}})
-        :param variations: size variations of the image
-        :rtype variations: StdImageField
-        :param render_variations: boolean or callable that returns a boolean.
-         The callable gets passed the app_name, model, field_name and pk.
-         Default: True
-        :rtype render_variations: bool, callable
+        Usage::
+
+            StdImageField(
+                upload_to='PATH',
+                variations={
+                    'thumbnail': {"width", "height", "crop", "resample"},
+                },
+                delete_orphans=True,
+            )
+
+        Args:
+            variations (dict):
+                Different size variations of the image.
+            render_variations (bool, callable):
+                Boolean or callable that returns a boolean. If True, the built-in
+                image render will be used. The callable gets passed the ``app_name``,
+                ``model``, ``field_name`` and ``pk``. Default: ``True``
+            delete_orphans (bool):
+                If ``True``, files orphaned files will be removed in case a new file
+                is assigned or the field is cleared. This will only remove work for
+                Django forms. If you unassign or reassign a field in code, you will
+                need to remove the orphaned files yourself.
+
         """
         if not variations:
             variations = {}
@@ -207,6 +219,7 @@ class StdImageField(ImageField):
         self.force_min_size = force_min_size
         self.render_variations = render_variations
         self.variations = {}
+        self.delete_orphans = delete_orphans
 
         for nm, prm in list(variations.items()):
             self.add_variation(nm, prm)
@@ -219,7 +232,7 @@ class StdImageField(ImageField):
                     key=lambda x: x["height"])["height"]
             )
 
-        super().__init__(verbose_name, name, *args, **kwargs)
+        super().__init__(verbose_name=verbose_name, name=name, **kwargs)
 
     def add_variation(self, name, params):
         variation = self.def_variation.copy()
@@ -253,12 +266,24 @@ class StdImageField(ImageField):
                                                      variation_name)
                     setattr(field, name, variation_field)
 
+    def post_delete_callback(self, sender, instance, **kwargs):
+        getattr(instance, self.name).delete(False)
+
     def contribute_to_class(self, cls, name):
         """Generate all operations on specified signals."""
         super().contribute_to_class(cls, name)
         signals.post_init.connect(self.set_variations, sender=cls)
+        if self.delete_orphans:
+            signals.post_delete.connect(self.post_delete_callback, sender=cls)
 
     def validate(self, value, model_instance):
         super().validate(value, model_instance)
         if self.force_min_size:
             MinSizeValidator(self.min_size[0], self.min_size[1])(value)
+
+    def save_form_data(self, instance, data):
+        if self.delete_orphans and self.blank and (data is False or data is not None):
+            file = getattr(instance, self.name)
+            if file and file._committed and file != data:
+                file.delete(save=False)
+        super().save_form_data(instance, data)

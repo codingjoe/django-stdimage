@@ -3,13 +3,11 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.db.models.signals import post_delete, pre_save
 from PIL import Image
 
 from stdimage import StdImageField
 from stdimage.models import StdImageFieldFile
-from stdimage.utils import (pre_delete_delete_callback, pre_save_delete_callback,
-                            render_variations,)
+from stdimage.utils import render_variations
 from stdimage.validators import MaxSizeValidator, MinSizeValidator
 
 upload_to = 'img/'
@@ -24,7 +22,11 @@ class AdminDeleteModel(models.Model):
     """can be deleted through admin"""
     image = StdImageField(
         upload_to=upload_to,
-        blank=True
+        variations={
+            'thumbnail': (100, 75),
+        },
+        blank=True,
+        delete_orphans=True,
     )
 
 
@@ -52,7 +54,8 @@ class ThumbnailModel(models.Model):
     image = StdImageField(
         upload_to=upload_to,
         blank=True,
-        variations={'thumbnail': (100, 75)}
+        variations={'thumbnail': (100, 75)},
+        delete_orphans=True,
     )
 
 
@@ -162,7 +165,3 @@ class CustomRenderVariationsModel(models.Model):
         variations={'thumbnail': (150, 150)},
         render_variations=custom_render_variations,
     )
-
-
-post_delete.connect(pre_delete_delete_callback, sender=SimpleModel)
-pre_save.connect(pre_save_delete_callback, sender=AdminDeleteModel)
