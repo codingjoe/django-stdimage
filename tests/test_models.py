@@ -1,5 +1,6 @@
 import io
 import os
+import time
 
 import pytest
 from django.conf import settings
@@ -209,6 +210,19 @@ class TestUtils(TestStdImage):
         obj = UtilVariationsModel.objects.create(image=self.fixtures['100.gif'])
         file_path = obj.image.thumbnail.path
         assert os.path.exists(file_path)
+
+    def test_render_variations_overwrite(self, db, image_upload_file):
+        obj = ThumbnailModel.objects.create(image=image_upload_file)
+        file_path = obj.image.thumbnail.path
+        before = os.path.getmtime(file_path)
+        time.sleep(0.1)
+        os.remove(obj.image.path)
+        assert os.path.exists(file_path)
+        obj.image = image_upload_file
+        obj.save()
+        assert file_path == obj.image.thumbnail.path
+        after = os.path.getmtime(file_path)
+        assert before != after, obj.image.path
 
 
 class TestValidators(TestStdImage):

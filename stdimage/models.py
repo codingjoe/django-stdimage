@@ -48,24 +48,25 @@ class StdImageFieldFile(ImageFieldFile):
         return img.size[0] > variation['width'] \
             or img.size[1] > variation['height']
 
-    def render_variations(self, replace=False):
+    def render_variations(self, replace=True):
         """Render all image variations and saves them to the storage."""
         for _, variation in self.field.variations.items():
             self.render_variation(self.name, variation, replace, self.storage)
 
     @classmethod
-    def render_variation(cls, file_name, variation, replace=False,
+    def render_variation(cls, file_name, variation, replace=True,
                          storage=default_storage):
         """Render an image variation and saves it to the storage."""
         variation_name = cls.get_variation_name(file_name, variation['name'])
-        if storage.exists(variation_name):
-            if replace:
-                storage.delete(variation_name)
-                logger.info('File "%s" already exists and has been replaced.',
-                            variation_name)
-            else:
-                logger.info('File "%s" already exists.', variation_name)
-                return variation_name
+        file_overwrite = getattr(storage, 'file_overwrite', False)
+        if not replace and storage.exists(variation_name):
+            logger.info('File "%s" already exists.', variation_name)
+            return variation_name
+        elif replace and not file_overwrite and storage.exists(variation_name):
+            logger.warning(
+                'File "%s" already exists and will be overwritten.', variation_name
+            )
+            storage.delete(variation_name)
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         with storage.open(file_name) as f:

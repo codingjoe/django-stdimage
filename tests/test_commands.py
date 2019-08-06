@@ -57,7 +57,7 @@ class TestRenderVariations:
         file_path = obj.image.thumbnail.path
         assert os.path.exists(file_path)
         before = os.path.getmtime(file_path)
-        time.sleep(1)
+        time.sleep(0.1)
         call_command(
             'rendervariations',
             'tests.ThumbnailModel.image',
@@ -71,7 +71,7 @@ class TestRenderVariations:
         file_path = obj.image.thumbnail.path
         assert os.path.exists(file_path)
         before = os.path.getmtime(file_path)
-        time.sleep(1)
+        time.sleep(0.1)
         call_command(
             'rendervariations',
             'tests.ThumbnailModel.image',
@@ -87,7 +87,7 @@ class TestRenderVariations:
         assert os.path.exists(file_path)
         os.remove(file_path)
         assert not os.path.exists(file_path)
-        time.sleep(1)
+        time.sleep(0.1)
         call_command(
             'rendervariations',
             'tests.ThumbnailModel.image',
@@ -101,7 +101,7 @@ class TestRenderVariations:
         assert os.path.exists(file_path)
         os.remove(file_path)
         assert not os.path.exists(file_path)
-        time.sleep(1)
+        time.sleep(0.1)
         call_command(
             'rendervariations',
             'tests.ThumbnailModel.image',
@@ -115,7 +115,7 @@ class TestRenderVariations:
         assert os.path.exists(file_path)
         os.remove(file_path)
         assert not os.path.exists(file_path)
-        time.sleep(1)
+        time.sleep(0.1)
         with pytest.raises(CommandError):
             call_command(
                 'rendervariations',
