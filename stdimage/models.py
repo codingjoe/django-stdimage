@@ -102,7 +102,7 @@ class StdImageFieldFile(ImageFieldFile):
                 )
 
             size = variation['width'], variation['height']
-            size = tuple(int(i) if i != float('inf') else i
+            size = tuple(int(i) if i is not None else i
                          for i in size)
 
             if file_format == 'JPEG':
@@ -168,8 +168,8 @@ class StdImageField(ImageField):
     descriptor_class = StdImageFileDescriptor
     attr_class = StdImageFieldFile
     def_variation = {
-        'width': float('inf'),
-        'height': float('inf'),
+        'width': None,
+        'height': None,
         'crop': False,
         'resample': Image.ANTIALIAS,
     }
@@ -308,6 +308,12 @@ class JPEGFieldFile(StdImageFieldFile):
 
         resample = variation['resample']
 
+        if variation['width'] is None:
+            variation['width'] = image.size[0]
+
+        if variation['height'] is None:
+            variation['height'] = image.size[1]
+
         factor = 1
         while image.size[0] / factor \
                 > 2 * variation['width'] \
@@ -322,7 +328,7 @@ class JPEGFieldFile(StdImageFieldFile):
             )
 
         size = variation['width'], variation['height']
-        size = tuple(int(i) if i != float('inf') else i
+        size = tuple(int(i) if i is not None else i
                      for i in size)
 
         # http://stackoverflow.com/a/21669827

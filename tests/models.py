@@ -65,7 +65,7 @@ class JPEGModel(models.Model):
         upload_to=upload_to,
         blank=True,
         variations={
-            'full': (float('inf'), float('inf')),
+            'full': (None, None),
             'thumbnail': (100, 75, True),
          },
         delete_orphans=True,

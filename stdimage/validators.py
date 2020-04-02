@@ -13,7 +13,7 @@ class BaseSizeValidator(BaseValidator):
         return True
 
     def __init__(self, width, height):
-        self.limit_value = width, height
+        self.limit_value = width or float('inf'), height or float('inf')
 
     def __call__(self, value):
         cleaned = self.clean(value)
@@ -36,7 +36,7 @@ class MaxSizeValidator(BaseSizeValidator):
     """
     ImageField validator to validate the max width and height of an image.
 
-    You may use float("inf") as an infinite boundary.
+    You may use None as an infinite boundary.
     """
 
     def compare(self, img_size, max_size):
@@ -51,7 +51,7 @@ class MinSizeValidator(BaseSizeValidator):
     """
     ImageField validator to validate the min width and height of an image.
 
-    You may use float("inf") as an infinite boundary.
+    You may use None as an infinite boundary.
     """
 
     def compare(self, img_size, min_size):

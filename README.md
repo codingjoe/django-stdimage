@@ -59,11 +59,11 @@ class MyModel(models.Model):
 
     # is the same as dictionary-style call
     image = StdImageField(upload_to='path/to/img', variations={'thumbnail': (100, 75)})
-    
+
     # variations are converted to JPEGs
     jpeg = JPEGField(
         upload_to='path/to/img',
-        variations={'full': (float('inf'), float('inf')), 'thumbnail': (100, 75)},
+        variations={'full': (None, None), 'thumbnail': (100, 75)},
     )
 
     # creates a thumbnail resized to 100x100 croping if necessary
