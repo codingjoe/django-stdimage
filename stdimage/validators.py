@@ -28,8 +28,9 @@ class BaseSizeValidator(BaseValidator):
     def clean(value):
         value.seek(0)
         stream = BytesIO(value.read())
-        img = Image.open(stream)
-        return img.size
+        size = Image.open(stream).size
+        value.seek(0)
+        return size
 
 
 class MaxSizeValidator(BaseSizeValidator):

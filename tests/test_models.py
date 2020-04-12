@@ -227,15 +227,17 @@ class TestUtils(TestStdImage):
 
 class TestValidators(TestStdImage):
     def test_max_size_validator(self, admin_client):
-        admin_client.post('/admin/tests/maxsizemodel/add/', {
+        response = admin_client.post('/admin/tests/maxsizemodel/add/', {
             'image': self.fixtures['600x400.jpg'],
         })
+        assert 'too large' in response.context['adminform'].form.errors['image'][0]
         assert not os.path.exists(os.path.join(IMG_DIR, '800x600.jpg'))
 
     def test_min_size_validator(self, admin_client):
-        admin_client.post('/admin/tests/minsizemodel/add/', {
+        response = admin_client.post('/admin/tests/minsizemodel/add/', {
             'image': self.fixtures['100.gif'],
         })
+        assert 'too small' in response.context['adminform'].form.errors['image'][0]
         assert not os.path.exists(os.path.join(IMG_DIR, '100.gif'))
 
 
