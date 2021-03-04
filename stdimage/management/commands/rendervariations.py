@@ -1,6 +1,3 @@
-from concurrent.futures import ProcessPoolExecutor
-from multiprocessing import cpu_count
-
 import progressbar
 from django.apps import apps
 from django.core.files.storage import get_storage_class
@@ -75,14 +72,12 @@ class Command(BaseCommand):
         )
         with progressbar.ProgressBar(max_value=count, widgets=(
             progressbar.RotatingMarker(),
-            ' | CPUs: {}'.format(cpu_count()),
             ' | ', progressbar.AdaptiveETA(),
             ' | ', progressbar.Percentage(),
             ' ', progressbar.Bar(),
         )) as bar:
-            with ProcessPoolExecutor() as executor:
-                for _ in executor.map(render_field_variations, kwargs_list):
-                    bar += 1
+            for _ in map(render_field_variations, kwargs_list):
+                bar += 1
 
 
 def render_field_variations(kwargs):

@@ -12,7 +12,6 @@ Django Field that implement the following features:
 * Access thumbnails on model level, no template tags required
 * Preserves original image
 * Asynchronous rendering (Celery & Co)
-* Multi threading and processing for optimum performance
 * Restrict accepted image dimensions
 * Rename files to a standardized name (using a callable upload_to)
 
@@ -195,12 +194,3 @@ The `replace` option will replace all existing files.
 The `ignore-missing` option will suspend missing source file errors and keep
 rendering variations for other files. Othervise command will stop on first
 missing file.
-
-### Multi processing
-Since version 2 stdImage supports multiprocessing.
-Every image is rendered in separate process.
-It not only increased performance but the garbage collection
-and therefore the huge memory footprint from previous versions.
-
-**Note:** PyPy seems to have some problems regarding multiprocessing,
-for that matter all multiprocessing is disabled in PyPy.
