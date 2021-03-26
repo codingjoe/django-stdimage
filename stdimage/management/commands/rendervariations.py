@@ -1,4 +1,3 @@
-import progressbar
 from django.apps import apps
 from django.core.files.storage import get_storage_class
 from django.core.management import BaseCommand, CommandError
@@ -59,8 +58,7 @@ class Command(BaseCommand):
 
             self.render(field, images, count, replace, ignore_missing, do_render)
 
-    @staticmethod
-    def render(field, images, count, replace, ignore_missing, do_render):
+    def render(self, field, images, count, replace, ignore_missing, do_render):
         kwargs_list = (
             dict(
                 file_name=file_name,
@@ -73,20 +71,26 @@ class Command(BaseCommand):
             )
             for file_name in images
         )
-        with progressbar.ProgressBar(
-            max_value=count,
-            widgets=(
-                progressbar.RotatingMarker(),
-                " | ",
-                progressbar.AdaptiveETA(),
-                " | ",
-                progressbar.Percentage(),
-                " ",
-                progressbar.Bar(),
-            ),
-        ) as bar:
-            for _ in map(render_field_variations, kwargs_list):
-                bar += 1
+        try:
+            import progressbar
+        except ImportError:
+            for file_name in map(render_field_variations, kwargs_list):
+                self.stdout.write(f"Processing: {file_name}", self.style.NOTICE)
+        else:
+            with progressbar.ProgressBar(
+                max_value=count,
+                widgets=(
+                    progressbar.RotatingMarker(),
+                    " | ",
+                    progressbar.AdaptiveETA(),
+                    " | ",
+                    progressbar.Percentage(),
+                    " ",
+                    progressbar.Bar(),
+                ),
+            ) as bar:
+                for _ in map(render_field_variations, kwargs_list):
+                    bar += 1
 
 
 def render_field_variations(kwargs):
@@ -101,7 +105,9 @@ def render_field_variations(kwargs):
             render_variations(**kwargs)
     except FileNotFoundError as e:
         if not ignore_missing:
+            print(ignore_missing)
             raise CommandError(
                 "Source file was not found, terminating. "
                 "Use -i/--ignore-missing to skip this error."
             ) from e
+    return kwargs["file_name"]
