@@ -3,3 +3,4 @@ include stdimage/locale/*/LC_MESSAGES/django.mo
 prune tests
 prune .github
 exclude .*
+exclude lint-requirements.txt
