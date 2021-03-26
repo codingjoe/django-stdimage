@@ -14,18 +14,18 @@ class TestRenderVariations:
         instance = ManualVariationsModel.customer_manager.create(
             image=image_upload_file
         )
-        path = os.path.join(IMG_DIR, 'image.thumbnail.jpg')
+        path = os.path.join(IMG_DIR, "image.thumbnail.jpg")
         assert not os.path.exists(path)
         render_variations(
             file_name=instance.image.name,
             variations={
-                'thumbnail': {
-                    'name': 'thumbnail',
-                    'width': 150,
-                    'height': 150,
-                    'crop': True,
-                    'resample': Image.ANTIALIAS
+                "thumbnail": {
+                    "name": "thumbnail",
+                    "width": 150,
+                    "height": 150,
+                    "crop": True,
+                    "resample": Image.ANTIALIAS,
                 }
-            }
+            },
         )
         assert os.path.exists(path)

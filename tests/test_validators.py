@@ -4,7 +4,8 @@ from stdimage import validators
 class TestBaseSizeValidator:
     def test_init__none(self):
         assert validators.MinSizeValidator(None, None).limit_value == (
-            float('inf'), float('inf')
+            float("inf"),
+            float("inf"),
         )
 
 

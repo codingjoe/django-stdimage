@@ -7,17 +7,14 @@ from PIL import Image
 
 @pytest.fixture
 def imagedata():
-    img = Image.new('RGB', (250, 250), (255, 55, 255))
+    img = Image.new("RGB", (250, 250), (255, 55, 255))
 
     output = io.BytesIO()
-    img.save(output, format='JPEG')
+    img.save(output, format="JPEG")
 
     return output
 
 
 @pytest.fixture
 def image_upload_file(imagedata):
-    return SimpleUploadedFile(
-        'image.jpg',
-        imagedata.getvalue()
-    )
+    return SimpleUploadedFile("image.jpg", imagedata.getvalue())

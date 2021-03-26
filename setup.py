@@ -48,7 +48,7 @@ class install(_install):
 
 
 setup(
-    name='django-stdimage',
+    name="django-stdimage",
     use_scm_version=True,
     cmdclass={
         "build": build,

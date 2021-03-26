@@ -5,8 +5,11 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models import signals
-from django.db.models.fields.files import (ImageField, ImageFieldFile,
-                                           ImageFileDescriptor,)
+from django.db.models.fields.files import (
+    ImageField,
+    ImageFieldFile,
+    ImageFileDescriptor,
+)
 from PIL import Image, ImageFile, ImageOps
 
 from .validators import MinSizeValidator
@@ -37,16 +40,15 @@ class StdImageFieldFile(ImageFieldFile):
         if not isinstance(render_variations, bool):
             msg = (
                 '"render_variations" callable expects a boolean return value,'
-                ' but got %s'
-                ) % type(render_variations)
+                " but got %s"
+            ) % type(render_variations)
             raise TypeError(msg)
         if render_variations:
             self.render_variations()
 
     @staticmethod
     def is_smaller(img, variation):
-        return img.size[0] > variation['width'] \
-            or img.size[1] > variation['height']
+        return img.size[0] > variation["width"] or img.size[1] > variation["height"]
 
     def render_variations(self, replace=True):
         """Render all image variations and saves them to the storage."""
@@ -54,11 +56,12 @@ class StdImageFieldFile(ImageFieldFile):
             self.render_variation(self.name, variation, replace, self.storage)
 
     @classmethod
-    def render_variation(cls, file_name, variation, replace=True,
-                         storage=default_storage):
+    def render_variation(
+        cls, file_name, variation, replace=True, storage=default_storage
+    ):
         """Render an image variation and saves it to the storage."""
-        variation_name = cls.get_variation_name(file_name, variation['name'])
-        file_overwrite = getattr(storage, 'file_overwrite', False)
+        variation_name = cls.get_variation_name(file_name, variation["name"])
+        file_overwrite = getattr(storage, "file_overwrite", False)
         if not replace and storage.exists(variation_name):
             logger.info('File "%s" already exists.', variation_name)
             return variation_name
@@ -83,47 +86,38 @@ class StdImageFieldFile(ImageFieldFile):
         """Process variation before actual saving."""
         save_kargs = {}
         file_format = image.format
-        save_kargs['format'] = file_format
+        save_kargs["format"] = file_format
 
-        resample = variation['resample']
+        resample = variation["resample"]
 
         if cls.is_smaller(image, variation):
             factor = 1
-            while image.size[0] / factor \
-                    > 2 * variation['width'] \
-                    and image.size[1] * 2 / factor \
-                    > 2 * variation['height']:
+            while (
+                image.size[0] / factor > 2 * variation["width"]
+                and image.size[1] * 2 / factor > 2 * variation["height"]
+            ):
                 factor *= 2
             if factor > 1:
                 image.thumbnail(
-                    (int(image.size[0] / factor),
-                     int(image.size[1] / factor)),
-                    resample=resample
+                    (int(image.size[0] / factor), int(image.size[1] / factor)),
+                    resample=resample,
                 )
 
-            size = variation['width'], variation['height']
-            size = tuple(int(i) if i is not None else i
-                         for i in size)
+            size = variation["width"], variation["height"]
+            size = tuple(int(i) if i is not None else i for i in size)
 
-            if file_format == 'JPEG':
+            if file_format == "JPEG":
                 # http://stackoverflow.com/a/21669827
-                image = image.convert('RGB')
-                save_kargs['optimize'] = True
-                save_kargs['quality'] = 'web_high'
+                image = image.convert("RGB")
+                save_kargs["optimize"] = True
+                save_kargs["quality"] = "web_high"
                 if size[0] * size[1] > 10000:  # roughly <10kb
-                    save_kargs['progressive'] = True
+                    save_kargs["progressive"] = True
 
-            if variation['crop']:
-                image = ImageOps.fit(
-                    image,
-                    size,
-                    method=resample
-                )
+            if variation["crop"]:
+                image = ImageOps.fit(image, size, method=resample)
             else:
-                image.thumbnail(
-                    size,
-                    resample=resample
-                )
+                image.thumbnail(size, resample=resample)
 
         return image, save_kargs
 
@@ -132,11 +126,13 @@ class StdImageFieldFile(ImageFieldFile):
         """Return the variation file name based on the variation."""
         path, ext = os.path.splitext(file_name)
         path, file_name = os.path.split(path)
-        file_name = '{file_name}.{variation_name}{extension}'.format(**{
-            'file_name': file_name,
-            'variation_name': variation_name,
-            'extension': ext,
-        })
+        file_name = "{file_name}.{variation_name}{extension}".format(
+            **{
+                "file_name": file_name,
+                "variation_name": variation_name,
+                "extension": ext,
+            }
+        )
         return os.path.join(path, file_name)
 
     def delete(self, save=True):
@@ -168,15 +164,22 @@ class StdImageField(ImageField):
     descriptor_class = StdImageFileDescriptor
     attr_class = StdImageFieldFile
     def_variation = {
-        'width': None,
-        'height': None,
-        'crop': False,
-        'resample': Image.ANTIALIAS,
+        "width": None,
+        "height": None,
+        "crop": False,
+        "resample": Image.ANTIALIAS,
     }
 
-    def __init__(self, verbose_name=None, name=None, variations=None,
-                 render_variations=True, force_min_size=False, delete_orphans=False,
-                 **kwargs):
+    def __init__(
+        self,
+        verbose_name=None,
+        name=None,
+        variations=None,
+        render_variations=True,
+        force_min_size=False,
+        delete_orphans=False,
+        **kwargs
+    ):
         """
         Standardized ImageField for Django.
 
@@ -207,13 +210,12 @@ class StdImageField(ImageField):
         if not variations:
             variations = {}
         if not isinstance(variations, dict):
-            msg = ('"variations" expects a dict,'
-                   ' but got %s') % type(variations)
+            msg = ('"variations" expects a dict,' " but got %s") % type(variations)
             raise TypeError(msg)
-        if not (isinstance(render_variations, bool) or
-                callable(render_variations)):
-            msg = ('"render_variations" excepts a boolean or callable,'
-                   ' but got %s') % type(render_variations)
+        if not (isinstance(render_variations, bool) or callable(render_variations)):
+            msg = (
+                '"render_variations" excepts a boolean or callable,' " but got %s"
+            ) % type(render_variations)
             raise TypeError(msg)
 
         self._variations = variations
@@ -227,10 +229,8 @@ class StdImageField(ImageField):
 
         if self.variations and self.force_min_size:
             self.min_size = (
-                max(self.variations.values(),
-                    key=lambda x: x["width"])["width"],
-                max(self.variations.values(),
-                    key=lambda x: x["height"])["height"]
+                max(self.variations.values(), key=lambda x: x["width"])["width"],
+                max(self.variations.values(), key=lambda x: x["height"])["height"],
             )
 
         super().__init__(verbose_name=verbose_name, name=name, **kwargs)
@@ -260,12 +260,9 @@ class StdImageField(ImageField):
             if field._committed:
                 for name, variation in list(self.variations.items()):
                     variation_name = self.attr_class.get_variation_name(
-                        field.name,
-                        variation['name']
+                        field.name, variation["name"]
                     )
-                    variation_field = ImageFieldFile(instance,
-                                                     self,
-                                                     variation_name)
+                    variation_field = ImageFieldFile(instance, self, variation_name)
                     setattr(field, name, variation_field)
 
     def post_delete_callback(self, sender, instance, **kwargs):
@@ -292,65 +289,55 @@ class StdImageField(ImageField):
 
 
 class JPEGFieldFile(StdImageFieldFile):
-
     @classmethod
     def get_variation_name(cls, file_name, variation_name):
         path = super().get_variation_name(file_name, variation_name)
         path, ext = os.path.splitext(path)
-        return '%s.jpeg' % path
+        return "%s.jpeg" % path
 
     @classmethod
     def process_variation(cls, variation, image):
         """Process variation before actual saving."""
         save_kargs = {}
-        file_format = 'JPEG'
-        save_kargs['format'] = file_format
+        file_format = "JPEG"
+        save_kargs["format"] = file_format
 
-        resample = variation['resample']
+        resample = variation["resample"]
 
-        if variation['width'] is None:
-            variation['width'] = image.size[0]
+        if variation["width"] is None:
+            variation["width"] = image.size[0]
 
-        if variation['height'] is None:
-            variation['height'] = image.size[1]
+        if variation["height"] is None:
+            variation["height"] = image.size[1]
 
         factor = 1
-        while image.size[0] / factor \
-                > 2 * variation['width'] \
-                and image.size[1] * 2 / factor \
-                > 2 * variation['height']:
+        while (
+            image.size[0] / factor > 2 * variation["width"]
+            and image.size[1] * 2 / factor > 2 * variation["height"]
+        ):
             factor *= 2
         if factor > 1:
             image.thumbnail(
-                (int(image.size[0] / factor),
-                 int(image.size[1] / factor)),
-                resample=resample
+                (int(image.size[0] / factor), int(image.size[1] / factor)),
+                resample=resample,
             )
 
-        size = variation['width'], variation['height']
-        size = tuple(int(i) if i is not None else i
-                     for i in size)
+        size = variation["width"], variation["height"]
+        size = tuple(int(i) if i is not None else i for i in size)
 
         # http://stackoverflow.com/a/21669827
-        image = image.convert('RGB')
-        save_kargs['optimize'] = True
-        save_kargs['quality'] = 'web_high'
+        image = image.convert("RGB")
+        save_kargs["optimize"] = True
+        save_kargs["quality"] = "web_high"
         if size[0] * size[1] > 10000:  # roughly <10kb
-            save_kargs['progressive'] = True
+            save_kargs["progressive"] = True
 
-        if variation['crop']:
-            image = ImageOps.fit(
-                image,
-                size,
-                method=resample
-            )
+        if variation["crop"]:
+            image = ImageOps.fit(image, size, method=resample)
         else:
-            image.thumbnail(
-                size,
-                resample=resample
-            )
+            image.thumbnail(size, resample=resample)
 
-        save_kargs.update(variation['kwargs'])
+        save_kargs.update(variation["kwargs"])
 
         return image, save_kargs
 

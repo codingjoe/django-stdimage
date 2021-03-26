@@ -10,20 +10,22 @@ from stdimage.models import StdImageFieldFile
 from stdimage.utils import render_variations
 from stdimage.validators import MaxSizeValidator, MinSizeValidator
 
-upload_to = 'img/'
+upload_to = "img/"
 
 
 class SimpleModel(models.Model):
     """works as ImageField"""
+
     image = StdImageField(upload_to=upload_to)
 
 
 class AdminDeleteModel(models.Model):
     """can be deleted through admin"""
+
     image = StdImageField(
         upload_to=upload_to,
         variations={
-            'thumbnail': (100, 75),
+            "thumbnail": (100, 75),
         },
         blank=True,
         delete_orphans=True,
@@ -32,10 +34,11 @@ class AdminDeleteModel(models.Model):
 
 class AdminUpdateModel(models.Model):
     """can be updated through admin, image not optional"""
+
     image = StdImageField(
         upload_to=upload_to,
         variations={
-            'thumbnail': (100, 75),
+            "thumbnail": (100, 75),
         },
         blank=False,
         delete_orphans=True,
@@ -44,71 +47,68 @@ class AdminUpdateModel(models.Model):
 
 class ResizeModel(models.Model):
     """resizes image to maximum size to fit a 640x480 area"""
+
     image = StdImageField(
         upload_to=upload_to,
         variations={
-            'medium': {'width': 400, 'height': 400},
-            'thumbnail': (100, 75),
-        }
+            "medium": {"width": 400, "height": 400},
+            "thumbnail": (100, 75),
+        },
     )
 
 
 class ResizeCropModel(models.Model):
     """resizes image to 640x480 cropping if necessary"""
+
     image = StdImageField(
-        upload_to=upload_to,
-        variations={'thumbnail': (150, 150, True)}
+        upload_to=upload_to, variations={"thumbnail": (150, 150, True)}
     )
 
 
 class ThumbnailModel(models.Model):
     """creates a thumbnail resized to maximum size to fit a 100x75 area"""
+
     image = StdImageField(
         upload_to=upload_to,
         blank=True,
-        variations={'thumbnail': (100, 75)},
+        variations={"thumbnail": (100, 75)},
         delete_orphans=True,
     )
 
 
 class JPEGModel(models.Model):
     """creates a thumbnail resized to maximum size to fit a 100x75 area"""
+
     image = JPEGField(
         upload_to=upload_to,
         blank=True,
         variations={
-            'full': (None, None),
-            'thumbnail': (100, 75, True),
-         },
+            "full": (None, None),
+            "thumbnail": (100, 75, True),
+        },
         delete_orphans=True,
     )
 
 
 class MaxSizeModel(models.Model):
-    image = StdImageField(
-        upload_to=upload_to,
-        validators=[MaxSizeValidator(16, 16)]
-    )
+    image = StdImageField(upload_to=upload_to, validators=[MaxSizeValidator(16, 16)])
 
 
 class MinSizeModel(models.Model):
-    image = StdImageField(
-        upload_to=upload_to,
-        validators=[MinSizeValidator(200, 200)]
-    )
+    image = StdImageField(upload_to=upload_to, validators=[MinSizeValidator(200, 200)])
 
 
 class ForceMinSizeModel(models.Model):
     """creates a thumbnail resized to maximum size to fit a 100x75 area"""
+
     image = StdImageField(
-        upload_to=upload_to,
-        force_min_size=True,
-        variations={'thumbnail': (600, 600)}
+        upload_to=upload_to, force_min_size=True, variations={"thumbnail": (600, 600)}
     )
 
 
 class CustomManager(models.Manager):
     """Just like Django's default, but a different class."""
+
     pass
 
 
@@ -121,18 +121,20 @@ class CustomManagerModel(models.Model):
 
 class ManualVariationsModel(CustomManagerModel):
     """delays creation of 150x150 thumbnails until it is called manually"""
+
     image = StdImageField(
         upload_to=upload_to,
-        variations={'thumbnail': (150, 150, True)},
-        render_variations=False
+        variations={"thumbnail": (150, 150, True)},
+        render_variations=False,
     )
 
 
 class MyStorageModel(CustomManagerModel):
     """delays creation of 150x150 thumbnails until it is called manually"""
+
     image = StdImageField(
         upload_to=upload_to,
-        variations={'thumbnail': (150, 150, True)},
+        variations={"thumbnail": (150, 150, True)},
         storage=FileSystemStorage(),
     )
 
@@ -144,18 +146,20 @@ def render_job(**kwargs):
 
 class UtilVariationsModel(models.Model):
     """delays creation of 150x150 thumbnails until it is called manually"""
+
     image = StdImageField(
         upload_to=upload_to,
-        variations={'thumbnail': (150, 150, True)},
-        render_variations=render_job
+        variations={"thumbnail": (150, 150, True)},
+        render_variations=render_job,
     )
 
 
 class ThumbnailWithoutDirectoryModel(models.Model):
     """Save into a generated filename that does not contain any '/' char"""
+
     image = StdImageField(
-        upload_to=lambda instance, filename: 'custom.gif',
-        variations={'thumbnail': {'width': 150, 'height': 150}},
+        upload_to=lambda instance, filename: "custom.gif",
+        variations={"thumbnail": {"width": 150, "height": 150}},
     )
 
 
@@ -163,8 +167,7 @@ def custom_render_variations(file_name, variations, storage, replace=False):
     """Resize image to 100x100."""
     for _, variation in variations.items():
         variation_name = StdImageFieldFile.get_variation_name(
-            file_name,
-            variation['name']
+            file_name, variation["name"]
         )
         if storage.exists(variation_name):
             storage.delete(variation_name)
@@ -175,7 +178,7 @@ def custom_render_variations(file_name, variations, storage, replace=False):
                 img = img.resize(size)
 
                 with BytesIO() as file_buffer:
-                    img.save(file_buffer, 'JPEG')
+                    img.save(file_buffer, "JPEG")
                     f = ContentFile(file_buffer.getvalue())
                     storage.save(variation_name, f)
 
@@ -187,6 +190,6 @@ class CustomRenderVariationsModel(models.Model):
 
     image = StdImageField(
         upload_to=upload_to,
-        variations={'thumbnail': (150, 150)},
+        variations={"thumbnail": (150, 150)},
         render_variations=custom_render_variations,
     )
