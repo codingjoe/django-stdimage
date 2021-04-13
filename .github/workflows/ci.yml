@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v2
       - uses: actions/checkout@v2
       - run: sudo apt install -y gettext aspell libenchant-dev
-      - uses: actions/cache@v2.1.4
+      - uses: actions/cache@v2.1.5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('lint-requirements.txt') }}
@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/setup-python@v2
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2.1.4
+      - uses: actions/cache@v2.1.5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('lint-requirements.txt') }}
