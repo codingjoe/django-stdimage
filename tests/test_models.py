@@ -270,3 +270,13 @@ class TestJPEGField(TestStdImage):
         assert obj.image.thumbnail.path.endswith("img/100.thumbnail.jpeg")
         assert obj.image.full.width == 100
         assert obj.image.full.height == 100
+
+    def test_convert_multiple(self, db):
+        large = models.JPEGModel.objects.create(image=self.fixtures["600x400.gif"])
+        small = models.JPEGModel.objects.create(image=self.fixtures["100.gif"])
+
+        assert large.image.field._variations["full"] == (None, None)
+        assert small.image.field._variations["full"] == (None, None)
+
+        assert large.image.full.width == 600
+        assert small.image.full.width == 100
