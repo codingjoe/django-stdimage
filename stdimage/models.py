@@ -304,16 +304,13 @@ class JPEGFieldFile(StdImageFieldFile):
 
         resample = variation["resample"]
 
-        if variation["width"] is None:
-            variation["width"] = image.size[0]
-
-        if variation["height"] is None:
-            variation["height"] = image.size[1]
+        width = image.size[0] if variation["width"] is None else variation["width"]
+        height = image.size[1] if variation["height"] is None else variation["height"]
 
         factor = 1
         while (
-            image.size[0] / factor > 2 * variation["width"]
-            and image.size[1] * 2 / factor > 2 * variation["height"]
+            image.size[0] / factor > 2 * width
+            and image.size[1] * 2 / factor > 2 * height
         ):
             factor *= 2
         if factor > 1:
@@ -322,7 +319,7 @@ class JPEGFieldFile(StdImageFieldFile):
                 resample=resample,
             )
 
-        size = variation["width"], variation["height"]
+        size = width, height
         size = tuple(int(i) if i is not None else i for i in size)
 
         # http://stackoverflow.com/a/21669827
