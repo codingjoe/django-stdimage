@@ -24,7 +24,7 @@ jobs:
   msgcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v2.2.2
+      - uses: actions/setup-python@v2.3.0
       - uses: actions/checkout@v2.4.0
       - run: sudo apt install -y gettext aspell libenchant-dev
       - uses: actions/cache@v2.1.6
@@ -48,7 +48,7 @@ jobs:
           - "pydocstyle ."
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v2.2.2
+      - uses: actions/setup-python@v2.3.0
       - uses: actions/checkout@v2.4.0
       - uses: actions/cache@v2.1.6
         with:
@@ -65,7 +65,7 @@ jobs:
     steps:
       - name: Install gettext
         run: sudo apt install gettext -y
-      - uses: actions/setup-python@v2.2.2
+      - uses: actions/setup-python@v2.3.0
       - run: python -m pip install --upgrade pip setuptools wheel twine readme-renderer
       - uses: actions/checkout@v2.4.0
       - run: python setup.py sdist bdist_wheel
@@ -94,7 +94,7 @@ jobs:
           - "progressbar"
     steps:
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.2.2
+      uses: actions/setup-python@v2.3.0
       with:
         python-version: ${{ matrix.python-version }}
     - run: sudo apt install gettext -y
