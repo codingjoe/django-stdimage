@@ -264,6 +264,9 @@ class StdImageField(ImageField):
 
         super().__init__(verbose_name=verbose_name, name=name, **kwargs)
 
+        # The attribute name of the old file to use on the model object
+        self._old_attname = "_old_%s" % name
+
     def add_variation(self, name, params):
         variation = self.def_variation.copy()
         variation["kwargs"] = {}
@@ -313,8 +316,18 @@ class StdImageField(ImageField):
         if self.delete_orphans and (data is False or data is not None):
             file = getattr(instance, self.name)
             if file and file._committed and file != data:
-                file.delete(save=False)
+                # Store the old file which should be deleted if the new one is valid
+                setattr(instance, self._old_attname, file)
         super().save_form_data(instance, data)
+
+    def pre_save(self, model_instance, add):
+        if hasattr(model_instance, self._old_attname):
+            # Delete the old file and its variations from the storage
+            old_file = getattr(model_instance, self._old_attname)
+            old_file.delete_variations()
+            old_file.storage.delete(old_file.name)
+            delattr(model_instance, self._old_attname)
+        return super().pre_save(model_instance, add)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()

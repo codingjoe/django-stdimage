@@ -95,7 +95,11 @@ class MaxSizeModel(models.Model):
 
 
 class MinSizeModel(models.Model):
-    image = StdImageField(upload_to=upload_to, validators=[MinSizeValidator(200, 200)])
+    image = StdImageField(
+        upload_to=upload_to,
+        delete_orphans=True,
+        validators=[MinSizeValidator(200, 200)],
+    )
 
 
 class ForceMinSizeModel(models.Model):

@@ -45,3 +45,16 @@ class TestStdImageField(TestStdImage):
         obj = form.save()
         assert obj.image
         assert os.path.exists(org_path)
+
+    def test_save_form_data__invalid(self, db):
+        instance = models.MinSizeModel.objects.create(
+            image=self.fixtures["600x400.jpg"]
+        )
+        org_path = instance.image.path
+        assert os.path.exists(org_path)
+        form = forms.MinSizeModelForm(
+            files={"image": self.fixtures["100.gif"]},
+            instance=instance,
+        )
+        assert not form.is_valid()
+        assert os.path.exists(org_path)
