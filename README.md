@@ -4,11 +4,92 @@
 
 # Django Standardized Image Field
 
+This package has been deprecated in favor of [django-pictures][django-pictures].
+
+## Migration Instructions
+
+First, make sure you understand the differences between the two packages and
+how to serve images in a modern web application via the [picture][picture-tag]-Element.
+
+Next, follow the setup instructions for [django-pictures][django-pictures].
+
+Once you are set up, change your models to use the new `PictureField` and provide the
+ `aspect_ratios` you'd like to serve. Do create migrations just yet.
+
+This step should be followed by changing your templates and frontend.
+The new placeholders feature for local development should help you
+to do this almost effortlessly.
+
+Finally, run `makemigrations` and replace the `AlterField` operation with
+`AlterPictureField`.
+
+We highly recommend to use Django's `image_width` and `image_height` fields, to avoid
+unnecessary IO. If you can add these fields to your model, you can use the following
+snippet to populate them:
+
+```python
+import django.core.files.storage
+from django.db import migrations, models
+import pictures.models
+from pictures.migrations import AlterPictureField
+
+def forward(apps, schema_editor):
+    for obj in apps.get_model("my-app.MyModel").objects.all().iterator():
+        obj.image_width = obj.logo.width
+        obj.image_height = obj.logo.height
+        obj.save(update_fields=["image_height", "image_width"])
+
+def backward(apps, schema_editor):
+    apps.get_model("my-app.MyModel").objects.all().update(
+        image_width=None,
+        image_height=None,
+    )
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('my-app', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="mymodel",
+            name="image_height",
+            field=models.PositiveIntegerField(editable=False, null=True),
+        ),
+        migrations.AddField(
+            model_name="mymodel",
+            name="image_width",
+            field=models.PositiveIntegerField(editable=False, null=True),
+        ),
+        migrations.RunPython(forward, backward),
+        AlterPictureField(
+            model_name="mymodel",
+            name="image",
+            field=pictures.models.PictureField(
+                aspect_ratios=["3/2", "3/1"],
+                breakpoints={"desktop": 1024, "mobile": 576},
+                container_width=1200,
+                file_types=["WEBP"],
+                grid_columns=12,
+                height_field="image_height",
+                pixel_densities=[1, 2],
+                storage=django.core.files.storage.FileSystemStorage(),
+                upload_to="pictures/",
+                verbose_name="image",
+                width_field="image_width",
+            ),
+        ),
+    ]
+```
+
+[django-pictures]: https://github.com/codingjoe/django-pictures
+[picture-tag]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
+
 ## Why would I want this?
 
 This is a drop-in replacement for the [Django ImageField](https://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.ImageField) that provides a standardized way to handle image uploads.
 It is designed to be as easy to use as possible, and to provide a consistent interface for all image fields.
-It allows images to be presented in various size variants (eg:thumbnails, mid, and hi-res versions) 
+It allows images to be presented in various size variants (eg:thumbnails, mid, and hi-res versions)
 and it provides a way to handle images that are too large with validators.
 
 
@@ -103,7 +184,7 @@ You can use a function for the `upload_to` argument. Using [Django Dynamic Filen
 
 This allows images to be given unique paths and filenames based on the model instance.
 
-Example 
+Example
 
 ```python
 from django.db import models

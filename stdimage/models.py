@@ -1,5 +1,6 @@
 import logging
 import os
+import warnings
 from io import BytesIO
 
 from django.core.files.base import ContentFile
@@ -16,6 +17,14 @@ from PIL.Image import Resampling
 from .validators import MinSizeValidator
 
 logger = logging.getLogger()
+
+
+warnings.warn(
+    "The django-stdimage is deprecated in favor of django-pictures.\n"
+    "Migration instructions are available in the README:\n"
+    "https://github.com/codingjoe/django-stdimage#migration-instructions",
+    DeprecationWarning,
+)
 
 
 class StdImageFileDescriptor(ImageFileDescriptor):
