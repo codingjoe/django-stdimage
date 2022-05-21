@@ -307,6 +307,19 @@ class StdImageField(ImageField):
                 file.delete(save=False)
         super().save_form_data(instance, data)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        return (
+            name,
+            path,
+            args,
+            {
+                **kwargs,
+                "variations": self._variations,
+                "force_min_size": self.force_min_size,
+            },
+        )
+
 
 class JPEGFieldFile(StdImageFieldFile):
     @classmethod
