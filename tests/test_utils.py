@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from PIL import Image
+from PIL.Image import Resampling
 
 from stdimage.utils import render_variations
 from tests.models import ManualVariationsModel
@@ -24,7 +24,7 @@ class TestRenderVariations:
                     "width": 150,
                     "height": 150,
                     "crop": True,
-                    "resample": Image.ANTIALIAS,
+                    "resample": Resampling.LANCZOS,
                 }
             },
         )

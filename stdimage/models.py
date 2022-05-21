@@ -11,6 +11,7 @@ from django.db.models.fields.files import (
     ImageFileDescriptor,
 )
 from PIL import Image, ImageFile, ImageOps
+from PIL.Image import Resampling
 
 from .validators import MinSizeValidator
 
@@ -186,7 +187,7 @@ class StdImageField(ImageField):
         "width": None,
         "height": None,
         "crop": False,
-        "resample": Image.ANTIALIAS,
+        "resample": Resampling.LANCZOS,
     }
 
     def __init__(
