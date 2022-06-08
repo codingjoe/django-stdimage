@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
     - run: sudo apt-get install gettext -y
     - run: python -m pip install --upgrade pip build wheel twine
     - run: python -m build --sdist --wheel
