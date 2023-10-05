@@ -1,5 +1,6 @@
 import io
 import os
+import pickle
 import time
 from copy import deepcopy
 
@@ -173,6 +174,20 @@ class TestModel(TestStdImage):
         with django_assert_num_queries(1):
             deferred.image
         assert instance.image.thumbnail == deferred.image.thumbnail
+
+    @pytest.mark.django_db
+    def test_variations_deepcopy_unsaved(self):
+        instance_original = ResizeModel(image=self.fixtures["600x400.jpg"])
+        instance = deepcopy(instance_original)
+        assert isinstance(instance.image, StdImageFieldFile)
+        assert instance.image == instance_original.image
+
+    @pytest.mark.django_db
+    def test_variations_deepcopy_without_image(self):
+        instance_original = ThumbnailModel.objects.create(image=None)
+        instance = deepcopy(instance_original)
+        assert isinstance(instance.image, StdImageFieldFile)
+        assert instance.image == instance_original.image
 
     @pytest.mark.django_db
     def test_variations_deepcopy(self):
