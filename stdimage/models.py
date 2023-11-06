@@ -158,9 +158,9 @@ class StdImageFieldFile(ImageFieldFile):
         state = super().__getstate__()
         state["variations"] = {}
         for variation_name in self.field.variations:
-            variation = getattr(self, variation_name)
-            variation_state = variation.__getstate__()
-            state["variations"][variation_name] = variation_state
+            if variation := getattr(self, variation_name, None):
+                variation_state = variation.__getstate__()
+                state["variations"][variation_name] = variation_state
         return state
 
     def __setstate__(self, state):
@@ -207,7 +207,7 @@ class StdImageField(ImageField):
         render_variations=True,
         force_min_size=False,
         delete_orphans=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Standardized ImageField for Django.
